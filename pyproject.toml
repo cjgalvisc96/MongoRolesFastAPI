@@ -9,6 +9,8 @@ python = "^3.9"
 fastapi = "^0.68.1"
 uvicorn = "^0.15.0"
 pydantic = {extras = ["dotenv"], version = "^1.8.2"}
+umongo = "^3.0.0"
+motor = "^2.5.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

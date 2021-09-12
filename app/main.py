@@ -1,13 +1,15 @@
-from fastapi import FastAPI
-
 from app.core.config import settings
+from app.create_app import create_app
 
-app = FastAPI(
-    title=settings.PROJECT_NAME,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json",
-)
+app = create_app(settings)
 
 
-@app.get("/ping")
-def get_ping():
-    return {"result": "pong"}
+if __name__ == "__main__":
+    import asyncio
+
+    import uvicorn
+
+    loop = asyncio.get_event_loop()
+    config = uvicorn.Config(app=app, port=settings.PORT, loop=loop)
+    server = uvicorn.Server(config)
+    loop.run_until_complete(server.serve())

@@ -1,14 +1,14 @@
 from functools import lru_cache
 from typing import Any, Dict, Optional
 
-from pydantic import BaseSettings, PostgresDsn, validator
+from pydantic import BaseSettings, validator
 
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = (
         "Mongo and FastAPI Role Based Access Control Auth Service"
     )
-    API_V1_STR: str = "/api/v1"
+    API_V1_PREFIX: str = "/api/v1"
     SECRET_KEY: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     USERS_OPEN_REGISTRATION: str
@@ -18,26 +18,17 @@ class Settings(BaseSettings):
     FIRST_SUPER_ADMIN_ACCOUNT_NAME: str
 
     DB_HOST: str
-    DB_USER: str
-    DB_PASSWORD: str
     DB_NAME: str
-    TEST_DB_NAME: str
 
-    SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = None
+    MONGO_DATABASE_URI: str = None
 
-    @validator("SQLALCHEMY_DATABASE_URI", pre=True)
+    @validator("MONGO_DATABASE_URI", pre=True)
     def assemble_db_connection(
         cls, v: Optional[str], values: Dict[str, Any]
     ) -> Any:
         if isinstance(v, str):
             return v
-        return PostgresDsn.build(
-            scheme="postgresql",
-            user=values.get("DB_USER"),
-            password=values.get("DB_PASSWORD"),
-            host=values.get("DB_HOST"),
-            path=f"/{values.get('DB_NAME') or  ''}",
-        )
+        return f"mongodb://{values.get('DB_HOST')}:{values.get('DB_NAME')}"
 
     class Config:
         case_sensitive = True
