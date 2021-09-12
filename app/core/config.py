@@ -5,7 +5,9 @@ from pydantic import BaseSettings, PostgresDsn, validator
 
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "Mongo and FastAPI Role Based Access Control Auth Service"
+    PROJECT_NAME: str = (
+        "Mongo and FastAPI Role Based Access Control Auth Service"
+    )
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
