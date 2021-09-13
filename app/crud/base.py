@@ -1,6 +1,9 @@
-from typing import Generic, Optional, Type, TypeVar
-from pydantic import BaseModel
+from typing import Generic, Optional, TypeVar
+
 from bson import ObjectId
+from fastapi.encoders import jsonable_encoder
+from pydantic import BaseModel
+
 from app.models.base import Base
 
 # Define custom types for SQLAlchemy model, and Pydantic schemas
@@ -10,13 +13,11 @@ UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
 
 
 class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
-    def __init__(self, model: Type[ModelType]):
-        """Base class that can be extend by other action classes.
-           Provides basic CRUD and listing operations.
-        :param model: The SQLAlchemy model
-        :type model: Type[ModelType]
-        """
-        self.model = model
+    async def get(self, _id: ObjectId) -> Optional[ModelType]:
+        return await self.model.find_one({"_id": ObjectId(_id)})
 
-    def get(self, _id: ObjectId) -> Optional[ModelType]:
-        return self.model.find_one({'_id': _id})
+    async def create(self, *, obj_in: CreateSchemaType) -> ModelType:
+        obj_in_data = jsonable_encoder(obj_in)
+        db_obj = self.model(**obj_in_data)
+        await db_obj.commit()
+        return db_obj.dump()

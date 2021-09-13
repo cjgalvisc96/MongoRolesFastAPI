@@ -4,6 +4,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 
+from app.api.api_v1.api import api_router
+from app.core.config import settings
 from app.db.session import db_instance
 
 
@@ -28,7 +30,7 @@ def ping_router(app):
 
 def add_routers(app):
     ping_router(app)
-    # app.include_router(app.router, prefix=settings.API_V1_PREFIX)
+    app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 
 
 def add_middleware(app):

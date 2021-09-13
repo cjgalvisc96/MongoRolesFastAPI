@@ -1,6 +1,11 @@
 from datetime import datetime
+
 from umongo import Document, fields
 
+from app.db.session import db_instance
+
+
+@db_instance.register
 class Base(Document):
     is_active = fields.BooleanField(default=True)
     created_at = fields.DateTimeField()
