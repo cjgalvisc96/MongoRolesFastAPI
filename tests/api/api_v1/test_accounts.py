@@ -1,14 +1,14 @@
 import pytest
 from fastapi.testclient import TestClient
 from httpx import AsyncClient
+
 from app import crud
 from tests.config import settings_test
 from tests.utils.utils import random_lower_string
 
+
 @pytest.mark.asyncio
-async def test_create_account(
-    client: TestClient
-) -> None:
+async def test_create_account(client: TestClient) -> None:
     account_name = random_lower_string()
     account_description = random_lower_string()
     data = {"name": account_name, "description": account_description}

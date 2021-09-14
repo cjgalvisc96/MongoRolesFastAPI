@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional
 
 from pydantic import BaseSettings, validator
 
+
 class SettingsTest(BaseSettings):
     PROJECT_NAME: str = (
         "Mongo and FastAPI Role Based Access Control Auth Service"
@@ -33,6 +34,7 @@ class SettingsTest(BaseSettings):
     class Config:
         case_sensitive = True
         env_file = ".env.test"
+
 
 @lru_cache()
 def get_settings():
