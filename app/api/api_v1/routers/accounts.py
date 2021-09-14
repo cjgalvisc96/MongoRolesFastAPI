@@ -1,8 +1,10 @@
 from typing import Any
+
 from fastapi import APIRouter, HTTPException
 from starlette import status
 
 from app import crud, schemas
+
 router = APIRouter(prefix="/accounts", tags=["accounts"])
 
 

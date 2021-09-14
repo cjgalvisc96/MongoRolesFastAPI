@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter
 
 from app.api.api_v1.routers import accounts

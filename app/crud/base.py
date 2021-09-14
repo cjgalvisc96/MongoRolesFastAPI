@@ -20,4 +20,4 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         obj_in_data = jsonable_encoder(obj_in)
         db_obj = self.model(**obj_in_data)
         await db_obj.commit()
-        return db_obj.dump()
+        return db_obj
