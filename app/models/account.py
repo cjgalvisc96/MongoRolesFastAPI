@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from umongo import fields, validate
 
 from app.db.session import db_instance
@@ -22,5 +23,6 @@ class Account(Base):
 
     def pre_update(self):
         self.updated_at = datetime.utcnow()
+
     class Meta:
         collection_name = "accounts"

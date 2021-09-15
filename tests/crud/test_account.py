@@ -1,5 +1,3 @@
-from os import remove
-from marshmallow.fields import List
 import pytest
 from fastapi.encoders import jsonable_encoder
 from starlette.testclient import TestClient
@@ -56,6 +54,7 @@ async def test_get_account(client: TestClient) -> None:
     assert type(account) is Account
     assert jsonable_encoder(account) == jsonable_encoder(account_2)
 
+
 @pytest.mark.asyncio
 async def test_get_account_by_name(client: TestClient) -> None:
     account_name = random_lower_string()
@@ -68,6 +67,7 @@ async def test_get_account_by_name(client: TestClient) -> None:
     assert account_2
     assert type(account) is Account
     assert jsonable_encoder(account) == jsonable_encoder(account_2)
+
 
 @pytest.mark.asyncio
 async def test_update_account(client: TestClient) -> None:
@@ -84,6 +84,7 @@ async def test_update_account(client: TestClient) -> None:
     assert account_2
     assert type(account) is Account
     assert account_2.name == new_account_name
+
 
 @pytest.mark.asyncio
 async def xtest_remove_account(client: TestClient) -> None:

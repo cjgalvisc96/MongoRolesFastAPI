@@ -17,7 +17,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         self, *, skip: int = 0, limit: int = 100
     ) -> List[ModelType]:
         objects = []
-        cursor = self.model.find().sort('name', -1).skip(skip).limit(limit)
+        cursor = self.model.find().sort("name", -1).skip(skip).limit(limit)
         async for document in cursor:
             objects.append(document)
         return objects
