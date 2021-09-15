@@ -16,7 +16,11 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     async def get_multi(
         self, *, skip: int = 0, limit: int = 100
     ) -> List[ModelType]:
-        return await self.model.find().skip(skip).limit(limit)
+        objects = []
+        cursor = self.model.find().sort('name', -1).skip(skip).limit(limit)
+        async for document in cursor:
+            objects.append(document)
+        return objects
 
     async def get(self, *, _id: str) -> Optional[ModelType]:
         return await self.model.find_one({"_id": ObjectId(_id)})
@@ -27,15 +31,19 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         await db_obj.commit()
         return db_obj
 
-    async def update(
+    async def _update(
         self,
         *,
-        db_obj: ModelType,
+        _id: str,
         obj_in: Union[UpdateSchemaType, Dict[str, Any]],
     ) -> ModelType:
-        pass
+        obj_in_data = jsonable_encoder(obj_in)
+        obj_to_update = await self.get(_id=_id)
+        obj_to_update.update(obj_in_data)
+        await obj_to_update.commit()
+        return obj_to_update
 
-    async def remove(self, *, _id: str) -> ModelType:
-        db_obj = self.model.remove({"_id": ObjectId(_id)})
-        await db_obj.commit()
-        return db_obj
+    async def _remove(self, *, _id: str):
+        self.model.remove({"_id": ObjectId(_id)})
+        await self.model.commit()
+        return None
