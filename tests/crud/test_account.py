@@ -83,6 +83,7 @@ async def test_update_account(client: TestClient) -> None:
     account_2 = await crud.account.get(_id=account.id)
     assert account_2
     assert type(account) is Account
+    assert account.description == account_2.description
     assert account_2.name == new_account_name
 
 
