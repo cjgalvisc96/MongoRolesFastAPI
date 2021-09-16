@@ -88,7 +88,7 @@ async def test_update_account(client: TestClient) -> None:
 
 
 @pytest.mark.asyncio
-async def xtest_remove_account(client: TestClient) -> None:
+async def test_remove_account(client: TestClient) -> None:
     account_name = random_lower_string()
     account_description = random_lower_string()
     account_in = schemas.AccountCreate(
@@ -96,12 +96,7 @@ async def xtest_remove_account(client: TestClient) -> None:
     )
     account = await crud.account.create(obj_in=account_in)
     account_id = account.id
-    await crud.account._remove(_id=account_id)
+    account_deleted = await crud.account._remove(_id=account_id)
     found_account_removed = await crud.account.get(_id=account_id)
-    breakpoint()
-    assert type(account) is Account
-    assert hasattr(account, "name")
-    assert hasattr(account, "description")
-    assert account.name == account_name
-    assert account.description == account_description
-    assert account.is_active
+    assert account_deleted == 1
+    assert not found_account_removed
