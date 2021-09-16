@@ -36,4 +36,4 @@ def db():
 
 @pytest.fixture(autouse=True)
 async def clean_db(client: TestClient, db: MotorAsyncIOInstance):
-    await db.accounts.delete_many({})
+    await db.command("dropDatabase")
