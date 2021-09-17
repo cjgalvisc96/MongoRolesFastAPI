@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     API_V1_PREFIX: str = "/api/v1"
     APP_PORT: int
     SECRET_KEY: str
+    ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     USERS_OPEN_REGISTRATION: str
     FIRST_SUPER_ADMIN_EMAIL: str

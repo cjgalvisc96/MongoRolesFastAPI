@@ -38,7 +38,10 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         _id: str,
         obj_in: Union[UpdateSchemaType, Dict[str, Any]],
     ) -> ModelType:
-        update_data = obj_in.dict(exclude_unset=True)
+        if isinstance(obj_in, dict):
+            update_data = obj_in
+        else:
+            update_data = obj_in.dict(exclude_unset=True)
         obj_to_update = await self.get(_id=_id)
         obj_to_update.update(update_data)
         await obj_to_update.commit()
