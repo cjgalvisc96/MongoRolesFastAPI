@@ -52,6 +52,14 @@ include=['./app/*']
 [tool.coverage.report]
 show_missing=true
 include=['./app/*']
+sort='-Miss'
+precision=2
+
+[tool.coverage.html]
+title="MongoRolesFastAPI Coverage Report"
+directory="coverage"
+show_contexts=true
+
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
