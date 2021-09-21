@@ -8,7 +8,7 @@ from app.schemas.validators import ObjectId
 
 # Shared properties
 class UserBase(BaseModel):
-    email: Optional[EmailStr] = None
+    email: EmailStr = None
     is_active: Optional[bool] = True
     full_name: Optional[str] = None
     phone_number: Optional[str] = None
