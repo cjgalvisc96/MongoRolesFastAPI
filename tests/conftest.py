@@ -1,14 +1,11 @@
 import asyncio
-from typing import Generator
+from typing import Generator, Any
 
 import pytest
-from starlette.testclient import TestClient
-from umongo.frameworks import MotorAsyncIOInstance
-
+from httpx import AsyncClient
+from app.core.db import mongo_db
 from app.create_app import create_app
-from app.db.session import db_instance
 from tests.config import settings_test
-
 
 @pytest.fixture(scope="session")
 def event_loop():
@@ -17,23 +14,16 @@ def event_loop():
     yield loop
     loop.close()
 
-
 @pytest.fixture(scope="session")
-def app(event_loop):
-    return create_app(settings_test)
-
-
-@pytest.fixture
-def client(app) -> Generator:
-    with TestClient(app) as c:
-        yield c
-
+async def client() -> Generator:
+    async with AsyncClient(app=create_app(settings_test), base_url="http://app.io") as client:
+        yield client
 
 @pytest.fixture
 def db():
-    return db_instance.db
-
+    mongo_db.init_db()
+    return mongo_db.db_instance
 
 @pytest.fixture(autouse=True)
-async def clean_db(client: TestClient, db: MotorAsyncIOInstance):
+async def clean_db(client: AsyncClient, db: Any):
     await db.command("dropDatabase")

@@ -1,6 +1,6 @@
 import pytest
 from fastapi.encoders import jsonable_encoder
-from starlette.testclient import TestClient
+from httpx import AsyncClient
 
 from app import crud, schemas
 from app.models.account import Account
@@ -8,7 +8,7 @@ from tests.utils.utils import random_lower_string
 
 
 @pytest.mark.asyncio
-async def test_create_account(client: TestClient) -> None:
+async def test_create_account(client: AsyncClient) -> None:
     account_name = random_lower_string()
     account_description = random_lower_string()
     account_in = schemas.AccountCreate(
@@ -24,7 +24,7 @@ async def test_create_account(client: TestClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_accounts(client: TestClient) -> None:
+async def test_get_accounts(client: AsyncClient) -> None:
     accounts_created = []
     accounts_to_create = 5
     for _ in range(accounts_to_create):
@@ -42,7 +42,7 @@ async def test_get_accounts(client: TestClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_account(client: TestClient) -> None:
+async def test_get_account(client: AsyncClient) -> None:
     account_name = random_lower_string()
     account_description = random_lower_string()
     account_in = schemas.AccountCreate(
@@ -56,7 +56,7 @@ async def test_get_account(client: TestClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_account_by_name(client: TestClient) -> None:
+async def test_get_account_by_name(client: AsyncClient) -> None:
     account_name = random_lower_string()
     account_description = random_lower_string()
     account_in = schemas.AccountCreate(
@@ -70,7 +70,7 @@ async def test_get_account_by_name(client: TestClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_update_account(client: TestClient) -> None:
+async def test_update_account(client: AsyncClient) -> None:
     account_name = random_lower_string()
     account_description = random_lower_string()
     account_in = schemas.AccountCreate(
@@ -88,7 +88,7 @@ async def test_update_account(client: TestClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_remove_account(client: TestClient) -> None:
+async def test_remove_account(client: AsyncClient) -> None:
     account_name = random_lower_string()
     account_description = random_lower_string()
     account_in = schemas.AccountCreate(

@@ -1,25 +1,18 @@
-import asyncio
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
 
 from app.api.api_v1.api import api_router
 from app.core.config import settings
-from app.db.session import db_instance
+from app.core.db import mongo_db
 
 
 def add_db(app, config_db):
-    app.state.db_instance = db_instance
+    mongo_db.uri = config_db.MONGO_DATABASE_URI
+    mongo_db.db_name = config_db.DB_NAME
 
     @app.on_event("startup")
     async def startup() -> None:
-        loop = asyncio.get_event_loop()
-        app.state.client = AsyncIOMotorClient(
-            config_db.MONGO_DATABASE_URI, io_loop=loop
-        )
-        app.state.db = app.state.client[config_db.DB_NAME]
-        app.state.db_instance.set_db(app.state.db)
+        app.state.db_instance = mongo_db.init_db()
 
 
 def ping_router(app):

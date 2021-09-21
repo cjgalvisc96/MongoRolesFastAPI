@@ -18,7 +18,6 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         obj_in.hashed_password = get_password_hash(obj_in.password)
         return await super().create(obj_in=obj_in)
 
-
     async def update(
         self,
         *,
@@ -34,9 +33,12 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
 
     def authenticate(
-        self, db: Session, *, email: str, password: str
+        self,
+        *, 
+        email: str,
+        password: str
     ) -> Optional[User]:
-        user = self.get_by_email(db, email=email)
+        user = self.get_by_email(email=email)
         if not user:
             return None
         if not verify_password(password, user.hashed_password):

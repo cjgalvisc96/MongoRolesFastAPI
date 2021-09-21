@@ -1,10 +1,10 @@
 from umongo import fields, validate
 
-from app.db.session import db_instance
 from app.models.base import Base
+from app.core.db import mongo_db
 
 
-@db_instance.register
+@mongo_db.db.register
 class Account(Base):
     name = fields.StringField(validate=validate.Length(max=255), required=True)
     description = fields.StringField(
