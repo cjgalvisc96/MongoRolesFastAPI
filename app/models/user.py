@@ -1,7 +1,7 @@
 from umongo import fields, validate
 
-from app.models.base import Base
 from app.core.db import mongo_db
+from app.models.base import Base
 
 
 @mongo_db.db.register

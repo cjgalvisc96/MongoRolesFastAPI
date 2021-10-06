@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from app.schemas.role import Role
 from app.schemas.validators import ObjectId
 
+
 # Shared properties
 class UserRoleBase(BaseModel):
     user_id: Optional[ObjectId]

@@ -4,6 +4,7 @@ from umongo import Document, fields
 
 from app.core.db import mongo_db
 
+
 @mongo_db.db.register
 class Base(Document):
     is_active = fields.BooleanField(default=True)

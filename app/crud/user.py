@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional, Union
 
 from bson import ObjectId
+
 from app.core.security import get_password_hash, verify_password
 from app.crud.base import CRUDBase
 from app.models.user import User
@@ -15,8 +16,12 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         return await self.model.find_one({"email": email})
 
     async def create(self, *, obj_in: UserCreate) -> User:
-        obj_in.hashed_password = get_password_hash(obj_in.password)
-        return await super().create(obj_in=obj_in)
+        create_data = obj_in.dict(exclude_unset=True)
+        create_data["hashed_password"] = get_password_hash(
+            create_data["password"]
+        )
+        del create_data["password"]
+        return await super().create(obj_in=create_data)
 
     async def update(
         self,
@@ -31,13 +36,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             update_data["hashed_password"] = hashed_password
         return await super().update(_id=_id, obj_in=update_data)
 
-
-    def authenticate(
-        self,
-        *, 
-        email: str,
-        password: str
-    ) -> Optional[User]:
+    def authenticate(self, *, email: str, password: str) -> Optional[User]:
         user = self.get_by_email(email=email)
         if not user:
             return None
@@ -56,7 +55,12 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         limit: int = 100,
     ) -> List[User]:
         objects = []
-        cursor = self.model.find({"account_id": account_id}).sort("name", -1).skip(skip).limit(limit)
+        cursor = (
+            self.model.find({"account_id": account_id})
+            .sort("name", -1)
+            .skip(skip)
+            .limit(limit)
+        )
         async for document in cursor:
             objects.append(document)
         return objects

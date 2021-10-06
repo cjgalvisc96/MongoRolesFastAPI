@@ -11,7 +11,7 @@ class AccountBase(BaseModel):
     name: str
     description: Optional[str]
     current_subscription_ends: Optional[datetime]
-    plan_id: Optional[ObjectId]
+    plan_id: Optional[str]
     is_active: Optional[bool] = True
 
 

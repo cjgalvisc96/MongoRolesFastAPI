@@ -1,7 +1,9 @@
 from abc import ABC
 from typing import Optional
-from umongo.frameworks import MotorAsyncIOInstance
+
 from motor.motor_asyncio import AsyncIOMotorClient
+from umongo.frameworks import MotorAsyncIOInstance
+
 
 class MongoAsync(ABC):
     def __init__(self, uri: str = None, db_name: str = None):
@@ -30,5 +32,6 @@ class MongoAsync(ABC):
     def db_instance(self):
         """Return a pure mongodb instance"""
         return self._instance.db
+
 
 mongo_db = MongoAsync()

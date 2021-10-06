@@ -1,7 +1,9 @@
 from typing import Optional
 
 from pydantic import BaseModel
+
 from app.schemas.validators import ObjectId
+
 
 # Shared properties
 class RoleBase(BaseModel):

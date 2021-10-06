@@ -6,13 +6,18 @@ from pydantic import BaseModel, EmailStr
 from app.schemas.user_role import UserRole
 from app.schemas.validators import ObjectId
 
+
 # Shared properties
 class UserBase(BaseModel):
-    email: EmailStr = None
-    is_active: Optional[bool] = True
-    full_name: Optional[str] = None
-    phone_number: Optional[str] = None
-    account_id: Optional[ObjectId] = None
+    email: EmailStr
+    is_active: bool = True
+    full_name: str
+    phone_number: str
+    account_id: str
+
+    class Config:
+        orm_mode = True
+        json_encoders = {ObjectId: str}
 
 
 # Properties to receive via API on creation

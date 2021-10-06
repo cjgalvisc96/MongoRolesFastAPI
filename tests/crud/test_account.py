@@ -1,16 +1,18 @@
 import pytest
+from faker import Faker
 from fastapi.encoders import jsonable_encoder
 from httpx import AsyncClient
 
 from app import crud, schemas
 from app.models.account import Account
-from tests.utils.utils import random_lower_string
+
+faker_data = Faker()
 
 
 @pytest.mark.asyncio
 async def test_create_account(client: AsyncClient) -> None:
-    account_name = random_lower_string()
-    account_description = random_lower_string()
+    account_name = faker_data.name()
+    account_description = faker_data.paragraph()
     account_in = schemas.AccountCreate(
         name=account_name, description=account_description
     )
@@ -28,8 +30,8 @@ async def test_get_accounts(client: AsyncClient) -> None:
     accounts_created = []
     accounts_to_create = 5
     for _ in range(accounts_to_create):
-        account_name = random_lower_string()
-        account_description = random_lower_string()
+        account_name = faker_data.name()
+        account_description = faker_data.paragraph()
         account_in = schemas.AccountCreate(
             name=account_name, description=account_description
         )
@@ -43,8 +45,8 @@ async def test_get_accounts(client: AsyncClient) -> None:
 
 @pytest.mark.asyncio
 async def test_get_account(client: AsyncClient) -> None:
-    account_name = random_lower_string()
-    account_description = random_lower_string()
+    account_name = faker_data.name()
+    account_description = faker_data.paragraph()
     account_in = schemas.AccountCreate(
         name=account_name, description=account_description
     )
@@ -57,8 +59,8 @@ async def test_get_account(client: AsyncClient) -> None:
 
 @pytest.mark.asyncio
 async def test_get_account_by_name(client: AsyncClient) -> None:
-    account_name = random_lower_string()
-    account_description = random_lower_string()
+    account_name = faker_data.name()
+    account_description = faker_data.paragraph()
     account_in = schemas.AccountCreate(
         name=account_name, description=account_description
     )
@@ -71,13 +73,13 @@ async def test_get_account_by_name(client: AsyncClient) -> None:
 
 @pytest.mark.asyncio
 async def test_update_account(client: AsyncClient) -> None:
-    account_name = random_lower_string()
-    account_description = random_lower_string()
+    account_name = faker_data.name()
+    account_description = faker_data.paragraph()
     account_in = schemas.AccountCreate(
         name=account_name, description=account_description
     )
     account = await crud.account.create(obj_in=account_in)
-    new_account_name = random_lower_string()
+    new_account_name = faker_data.name()
     account_in_update = schemas.AccountUpdate(name=new_account_name)
     await crud.account._update(_id=account.id, obj_in=account_in_update)
     account_2 = await crud.account.get(_id=account.id)
@@ -89,8 +91,8 @@ async def test_update_account(client: AsyncClient) -> None:
 
 @pytest.mark.asyncio
 async def test_remove_account(client: AsyncClient) -> None:
-    account_name = random_lower_string()
-    account_description = random_lower_string()
+    account_name = faker_data.name()
+    account_description = faker_data.paragraph()
     account_in = schemas.AccountCreate(
         name=account_name, description=account_description
     )
