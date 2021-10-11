@@ -23,7 +23,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         del create_data["password"]
         return await super().create(obj_in=create_data)
 
-    async def update(
+    async def _update(
         self,
         *,
         _id: str,
@@ -34,7 +34,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             hashed_password = get_password_hash(update_data["password"])
             del update_data["password"]
             update_data["hashed_password"] = hashed_password
-        return await super().update(_id=_id, obj_in=update_data)
+        return await super()._update(_id=_id, obj_in=update_data)
 
     def authenticate(self, *, email: str, password: str) -> Optional[User]:
         user = self.get_by_email(email=email)
@@ -54,16 +54,14 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         skip: int = 0,
         limit: int = 100,
     ) -> List[User]:
-        objects = []
-        cursor = (
+        users_found = (
             self.model.find({"account_id": account_id})
             .sort("name", -1)
             .skip(skip)
             .limit(limit)
         )
-        async for document in cursor:
-            objects.append(document)
-        return objects
+        response = [user_found async for user_found in users_found]
+        return response
 
 
 user = CRUDUser()
