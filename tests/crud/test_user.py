@@ -32,3 +32,28 @@ async def test_create_user(client: AsyncClient) -> None:
     assert user.account_id == fake_account_id
     assert hasattr(user, "hashed_password")
     assert verify_password(fake_password, user.hashed_password)
+
+
+@pytest.mark.asyncio
+async def test_get_users(client: AsyncClient) -> None:
+    users_created = []
+    users_to_create = 5
+    for _ in range(users_to_create):
+        fake_email = faker_data.email()
+        fake_password = faker_data.password(length=12)
+        fake_full_name = faker_data.name()
+        fake_phone_number = "3191231234"
+        fake_account_id = ObjectId()
+        user_in = schemas.UserCreate(
+            email=fake_email,
+            password=fake_password,
+            full_name=fake_full_name,
+            phone_number=fake_phone_number,
+            account_id=str(fake_account_id),
+        )
+        user_created = await crud.user.create(obj_in=user_in)
+        users_created.append(user_created)
+    users = await crud.user.get_multi(skip=0, limit=users_to_create)
+    assert len(users) == users_to_create
+    assert type(users) is list
+    assert type(users[0]) is User
