@@ -53,7 +53,7 @@ async def test_get_account(client: AsyncClient) -> None:
     account = await crud.account.create(obj_in=account_in)
     account_2 = await crud.account.get(_id=account.id)
     assert account_2
-    assert type(account) is Account
+    assert type(account_2) is Account
     assert jsonable_encoder(account) == jsonable_encoder(account_2)
 
 
@@ -67,7 +67,7 @@ async def test_get_account_by_name(client: AsyncClient) -> None:
     account = await crud.account.create(obj_in=account_in)
     account_2 = await crud.account.get_by_name(name=account_name)
     assert account_2
-    assert type(account) is Account
+    assert type(account_2) is Account
     assert jsonable_encoder(account) == jsonable_encoder(account_2)
 
 
@@ -84,7 +84,7 @@ async def test_update_account(client: AsyncClient) -> None:
     await crud.account._update(_id=account.id, obj_in=account_in_update)
     account_2 = await crud.account.get(_id=account.id)
     assert account_2
-    assert type(account) is Account
+    assert type(account_2) is Account
     assert account.description == account_2.description
     assert account_2.name == new_account_name
 

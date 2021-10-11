@@ -1,6 +1,7 @@
 import pytest
 from bson.objectid import ObjectId
 from faker import Faker
+from fastapi.encoders import jsonable_encoder
 from httpx import AsyncClient
 
 from app import crud, schemas
@@ -57,3 +58,24 @@ async def test_get_users(client: AsyncClient) -> None:
     assert len(users) == users_to_create
     assert type(users) is list
     assert type(users[0]) is User
+
+
+@pytest.mark.asyncio
+async def test_get_user(client: AsyncClient) -> None:
+    fake_email = faker_data.email()
+    fake_password = faker_data.password(length=12)
+    fake_full_name = faker_data.name()
+    fake_phone_number = "3191231234"
+    fake_account_id = ObjectId()
+    user_in = schemas.UserCreate(
+        email=fake_email,
+        password=fake_password,
+        full_name=fake_full_name,
+        phone_number=fake_phone_number,
+        account_id=str(fake_account_id),
+    )
+    user = await crud.user.create(obj_in=user_in)
+    user_2 = await crud.user.get(_id=user.id)
+    assert user_2
+    assert type(user_2) is User
+    assert jsonable_encoder(user) == jsonable_encoder(user_2)
