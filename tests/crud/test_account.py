@@ -5,8 +5,9 @@ from httpx import AsyncClient
 
 from app import crud, schemas
 from app.models.account import Account
+from tests.config import settings_test
 
-faker_data = Faker()
+faker_data = Faker(locale=settings_test.FAKER_DATA_LOCATE)
 
 
 @pytest.mark.asyncio

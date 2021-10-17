@@ -17,6 +17,7 @@ class SettingsTest(BaseSettings):
     FIRST_SUPER_ADMIN_EMAIL: str
     FIRST_SUPER_ADMIN_PASSWORD: str
     FIRST_SUPER_ADMIN_ACCOUNT_NAME: str
+    FAKER_DATA_LOCATE: str = "es_MX"  # For México faker data
 
     DB_HOST: str
     DB_PORT: int
