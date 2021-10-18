@@ -7,7 +7,7 @@ from app.schemas.validators import ObjectId
 
 # Shared properties
 class RoleBase(BaseModel):
-    name: Optional[str]
+    name: str
     description: Optional[str]
 
 

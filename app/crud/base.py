@@ -25,6 +25,9 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     async def get(self, *, _id: str) -> Optional[ModelType]:
         return await self.model.find_one({"_id": ObjectId(_id)})
 
+    async def get_by_name(self, *, name: str) -> Optional[ModelType]:
+        return await self.model.find_one({"name": name})
+
     async def create(self, *, obj_in: CreateSchemaType) -> ModelType:
         obj_in_data = jsonable_encoder(obj_in)
         db_obj = self.model(**obj_in_data)

@@ -44,9 +44,6 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             return None
         return user
 
-    def is_active(self, user: User) -> bool:
-        return user.is_active
-
     async def get_by_account_id(
         self,
         *,

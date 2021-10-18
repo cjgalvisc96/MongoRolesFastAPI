@@ -17,7 +17,7 @@ async def test_create_user(client: AsyncClient) -> None:
     fake_email = faker_data.email()
     fake_password = faker_data.password(length=12)
     fake_full_name = faker_data.name()
-    fake_phone_number = "3191231234"
+    fake_phone_number = faker_data.random_number(digits=10)
     fake_account_id = ObjectId()
     user_in = schemas.UserCreate(
         email=fake_email,
@@ -30,7 +30,7 @@ async def test_create_user(client: AsyncClient) -> None:
     assert type(user) is User
     assert user.email == fake_email
     assert user.full_name == fake_full_name
-    assert user.phone_number == fake_phone_number
+    assert user.phone_number == str(fake_phone_number)
     assert user.account_id == fake_account_id
     assert hasattr(user, "hashed_password")
     assert verify_password(fake_password, user.hashed_password)
@@ -44,7 +44,7 @@ async def test_get_users(client: AsyncClient) -> None:
         fake_email = faker_data.email()
         fake_password = faker_data.password(length=12)
         fake_full_name = faker_data.name()
-        fake_phone_number = "3191231234"
+        fake_phone_number = faker_data.random_number(digits=10)
         fake_account_id = ObjectId()
         user_in = schemas.UserCreate(
             email=fake_email,
@@ -66,7 +66,7 @@ async def test_get_user(client: AsyncClient) -> None:
     fake_email = faker_data.email()
     fake_password = faker_data.password(length=12)
     fake_full_name = faker_data.name()
-    fake_phone_number = "3191231234"
+    fake_phone_number = faker_data.random_number(digits=10)
     fake_account_id = ObjectId()
     user_in = schemas.UserCreate(
         email=fake_email,
@@ -87,7 +87,7 @@ async def test_get_user_by_email(client: AsyncClient) -> None:
     fake_email = faker_data.email()
     fake_password = faker_data.password(length=12)
     fake_full_name = faker_data.name()
-    fake_phone_number = "3191231234"
+    fake_phone_number = faker_data.random_number(digits=10)
     fake_account_id = ObjectId()
     user_in = schemas.UserCreate(
         email=fake_email,
@@ -108,7 +108,7 @@ async def test_update_user(client: AsyncClient) -> None:
     fake_email = faker_data.email()
     fake_password = faker_data.password(length=12)
     fake_full_name = faker_data.name()
-    fake_phone_number = "3191231234"
+    fake_phone_number = faker_data.random_number(digits=10)
     fake_account_id = ObjectId()
     user_in = schemas.UserCreate(
         email=fake_email,
@@ -121,7 +121,7 @@ async def test_update_user(client: AsyncClient) -> None:
 
     new_user_password = faker_data.password(length=12)
     new_user_full_name = faker_data.name()
-    new_user_phone_number = "3191231235"
+    new_user_phone_number = faker_data.random_number(digits=10)
     user_in_update = schemas.UserUpdate(
         password=new_user_password,
         full_name=new_user_full_name,
@@ -134,7 +134,7 @@ async def test_update_user(client: AsyncClient) -> None:
     assert type(user_updated) is User
     assert user.email == user_updated.email
     assert user_updated.full_name == new_user_full_name
-    assert user_updated.phone_number == new_user_phone_number
+    assert user_updated.phone_number == str(new_user_phone_number)
     assert hasattr(user_updated, "hashed_password")
     assert verify_password(new_user_password, user_updated.hashed_password)
 
@@ -144,7 +144,7 @@ async def test_remove_user(client: AsyncClient) -> None:
     fake_email = faker_data.email()
     fake_password = faker_data.password(length=12)
     fake_full_name = faker_data.name()
-    fake_phone_number = "3191231234"
+    fake_phone_number = faker_data.random_number(digits=10)
     fake_account_id = ObjectId()
     user_in = schemas.UserCreate(
         email=fake_email,
@@ -170,7 +170,7 @@ async def test_get_users_by_account_id(client: AsyncClient) -> None:
         fake_email = faker_data.email()
         fake_password = faker_data.password(length=12)
         fake_full_name = faker_data.name()
-        fake_phone_number = "3191231234"
+        fake_phone_number = faker_data.random_number(digits=10)
         user_in = schemas.UserCreate(
             email=fake_email,
             password=fake_password,
