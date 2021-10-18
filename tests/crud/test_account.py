@@ -103,3 +103,22 @@ async def test_remove_account(client: AsyncClient) -> None:
     found_account_removed = await crud.account.get(_id=account_id)
     assert account_deleted == 1
     assert not found_account_removed
+
+
+@pytest.mark.asyncio
+async def test_partial_remove_account(client: AsyncClient) -> None:
+    account_name = faker_data.name()
+    account_description = faker_data.paragraph()
+    account_in = schemas.AccountCreate(
+        name=account_name, description=account_description
+    )
+    account = await crud.account.create(obj_in=account_in)
+    account_id = account.id
+    await crud.account.partial_remove(_id=account_id)
+    found_account_removed = await crud.account.get(_id=account_id)
+    assert type(found_account_removed) is Account
+    assert hasattr(found_account_removed, "name")
+    assert hasattr(found_account_removed, "description")
+    assert found_account_removed.name == account_name
+    assert found_account_removed.description == account_description
+    assert not found_account_removed.is_active

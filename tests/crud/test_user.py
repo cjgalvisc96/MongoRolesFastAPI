@@ -34,6 +34,7 @@ async def test_create_user(client: AsyncClient) -> None:
     assert user.account_id == fake_account_id
     assert hasattr(user, "hashed_password")
     assert verify_password(fake_password, user.hashed_password)
+    assert user.is_active
 
 
 @pytest.mark.asyncio
@@ -186,3 +187,31 @@ async def test_get_users_by_account_id(client: AsyncClient) -> None:
     assert len(users_found_by_account_id) == users_to_create
     assert type(users_found_by_account_id) is list
     assert type(users_found_by_account_id[0]) is User
+
+
+@pytest.mark.asyncio
+async def test_partial_remove_user(client: AsyncClient) -> None:
+    fake_email = faker_data.email()
+    fake_password = faker_data.password(length=12)
+    fake_full_name = faker_data.name()
+    fake_phone_number = faker_data.random_number(digits=10)
+    fake_account_id = ObjectId()
+    user_in = schemas.UserCreate(
+        email=fake_email,
+        password=fake_password,
+        full_name=fake_full_name,
+        phone_number=fake_phone_number,
+        account_id=str(fake_account_id),
+    )
+    user = await crud.user.create(obj_in=user_in)
+    user_id = user.id
+    await crud.user.partial_remove(_id=user_id)
+    found_user_removed = await crud.user.get(_id=user_id)
+    assert type(found_user_removed) is User
+    assert found_user_removed.email == fake_email
+    assert found_user_removed.full_name == fake_full_name
+    assert found_user_removed.phone_number == str(fake_phone_number)
+    assert found_user_removed.account_id == fake_account_id
+    assert hasattr(found_user_removed, "hashed_password")
+    assert verify_password(fake_password, found_user_removed.hashed_password)
+    assert not found_user_removed.is_active

@@ -54,3 +54,10 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         find_object = await self.get(_id=_id)
         object_deleted = await find_object.delete()
         return object_deleted.deleted_count
+
+    async def partial_remove(self, *, _id: str) -> ModelType:
+        update_status = {"is_active": False}
+        obj_to_update = await self.get(_id=_id)
+        obj_to_update.update(update_status)
+        await obj_to_update.commit()
+        return obj_to_update
