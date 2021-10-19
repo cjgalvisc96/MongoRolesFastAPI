@@ -13,6 +13,7 @@ umongo = "^3.0.0"
 motor = "^2.5.1"
 python-jose = "^3.3.0"
 passlib = "^1.7.4"
+python-multipart = "^0.0.5"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
