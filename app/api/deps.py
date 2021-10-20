@@ -60,6 +60,7 @@ async def get_current_user(
             detail="Not enough permissions",
             headers={"WWW-Authenticate": authenticate_value},
         )
+
     if (
         security_scopes.scopes
         and token_data.role not in security_scopes.scopes

@@ -1,5 +1,7 @@
 from pydantic import BaseModel
+
 from app.schemas.validators import ObjectId
+
 
 class Token(BaseModel):
     access_token: str

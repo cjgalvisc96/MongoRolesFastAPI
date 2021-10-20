@@ -48,6 +48,6 @@ async def superadmin_token_headers(client: AsyncClient) -> Dict[str, str]:
 
 @pytest.fixture()
 async def normal_user_token_headers(client: AsyncClient) -> Dict[str, str]:
-    return authentication_token_from_email(
+    return await authentication_token_from_email(
         client=client, email=regular_user_email
     )
