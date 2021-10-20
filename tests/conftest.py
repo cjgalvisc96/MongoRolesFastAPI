@@ -6,6 +6,7 @@ from httpx import AsyncClient
 
 from app.core.db import mongo_db
 from app.create_app import create_app
+from app.db.init_db import init_db
 from tests.config import settings_test
 from tests.utils.user import (
     authentication_token_from_email,
@@ -34,6 +35,11 @@ async def client() -> Generator:
 def db():
     mongo_db.init_db()
     return mongo_db.db_instance
+
+
+@pytest.fixture()
+async def auto_init_db():
+    await init_db()
 
 
 @pytest.fixture(autouse=True)

@@ -35,7 +35,7 @@ async def login_access_token(
     access_token_expires = timedelta(
         minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
-    if not user.user_role:
+    if not hasattr(user, "user_role"):
         role = "GUEST"
     else:
         role = user.user_role.role.name
@@ -59,7 +59,7 @@ async def test_token(
     """
     Test access token
     """
-    return await current_user
+    return current_user
 
 
 @router.post("/hash-password", response_model=str)

@@ -51,7 +51,7 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
         )
-    user = await crud.user.get(id=token_data.id)
+    user = await crud.user.get(_id=token_data.id)
     if not user:
         raise credentials_exception
     if security_scopes.scopes and not token_data.role:

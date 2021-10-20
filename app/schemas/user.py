@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Union
 
 from pydantic import BaseModel, EmailStr
 
@@ -13,7 +13,7 @@ class UserBase(BaseModel):
     is_active: bool = True
     full_name: str
     phone_number: str
-    account_id: str
+    account_id: Union[str, ObjectId]
 
     class Config:
         orm_mode = True

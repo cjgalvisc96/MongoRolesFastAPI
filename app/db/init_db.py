@@ -1,4 +1,5 @@
 from typing import Dict, Optional
+
 from app import crud, schemas
 from app.constants.role import Role
 from app.core.config import settings
@@ -39,7 +40,7 @@ async def create_superadmin_user() -> User:
             password=settings.FIRST_SUPER_ADMIN_PASSWORD,
             full_name=settings.FIRST_SUPER_ADMIN_EMAIL,
             phone_number=settings.FIRST_SUPER_ADMIN_PHONE_NUMBER,
-            account_id=str(account.id)
+            account_id=str(account.id),
         )
         user = await crud.user.create(obj_in=user_in)
 
