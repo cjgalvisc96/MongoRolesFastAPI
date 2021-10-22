@@ -22,3 +22,11 @@ class User(Base):
 
     class Meta:
         collection_name = "users"
+
+    """
+    from marshmallow import pre_load
+    @pre_load(pass_many=False)
+    def remove_envelope(self, data, many, **kwargs):
+        data['user_role'] = {"hello": "world"}
+        return data
+    """

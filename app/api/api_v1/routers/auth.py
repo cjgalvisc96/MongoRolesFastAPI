@@ -7,6 +7,7 @@ from starlette import status
 
 from app import crud, models, schemas
 from app.api import deps
+from app.api.utils import get_role_name_from_user
 from app.core import security
 from app.core.config import settings
 
@@ -35,10 +36,9 @@ async def login_access_token(
     access_token_expires = timedelta(
         minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
-    if not hasattr(user, "user_role"):
-        role = "GUEST"
-    else:
-        role = user.user_role.role.name
+
+    role = await get_role_name_from_user(user_id=str(user.id))
+
     token_payload = {
         "id": str(user.id),
         "role": role,

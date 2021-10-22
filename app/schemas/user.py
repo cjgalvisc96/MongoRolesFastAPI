@@ -3,7 +3,6 @@ from typing import Optional, Union
 
 from pydantic import BaseModel, EmailStr
 
-from app.schemas.user_role import UserRole
 from app.schemas.validators import ObjectId
 
 
@@ -37,7 +36,6 @@ class UserUpdate(UserBase):
 
 class UserInDBBase(UserBase):
     id: ObjectId
-    user_role: Optional[UserRole]
     created_at: datetime
     updated_at: datetime
 
