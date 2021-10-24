@@ -1,3 +1,4 @@
+from bson import ObjectId
 from umongo import fields, validate
 
 from app.core.db import mongo_db
@@ -22,6 +23,45 @@ class User(Base):
 
     class Meta:
         collection_name = "users"
+
+    @classmethod
+    async def get_with_role_and_account(cls, *, user_id: str):
+        pipeline = [
+            {"$match": {"_id": ObjectId(user_id)}},
+            # join with user_role collection
+            {
+                "$lookup": {
+                    "from": "user_roles",
+                    "localField": "_id",
+                    "foreignField": "user_id",
+                    "pipeline": [
+                        {"$project": {"role_id": 1}},
+                    ],
+                    "as": "user_role",
+                }
+            },
+            # create temp vars
+            {"$addFields": {"temp_role_id": "$user_role.role_id"}},
+            # join with role collection
+            {
+                "$lookup": {
+                    "from": "roles",
+                    "localField": "temp_role_id",
+                    "foreignField": "_id",
+                    "pipeline": [
+                        {"$project": {"name": 1}},
+                    ],
+                    "as": "role",
+                }
+            },
+            # remove innecesary temp vars
+            {"$project": {"temp_role_id": 0}},
+        ]
+        user_with_role_and_account = {}
+        cursor = cls.collection.aggregate(pipeline)
+        async for document in cursor:
+            user_with_role_and_account = document
+        return user_with_role_and_account
 
     """
     from marshmallow import pre_load

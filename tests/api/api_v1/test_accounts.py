@@ -1,17 +1,18 @@
-import pytest
-from httpx import AsyncClient
-from faker import Faker
 from typing import Any
-from app import crud, schemas, models
+
+import pytest
+from faker import Faker
+from httpx import AsyncClient
+
+from app import crud, models, schemas
 from tests.config import settings_test
 
 faker_data = Faker(locale=settings_test.FAKER_DATA_LOCATE)
 
+
 @pytest.mark.asyncio
 async def test_get_all_accounts_by_authorised_user(
-    client: AsyncClient,
-    auto_init_db: Any,
-    superadmin_token_headers: dict
+    client: AsyncClient, auto_init_db: Any, superadmin_token_headers: dict
 ) -> None:
     account_name = faker_data.name()
     account_description = faker_data.paragraph()
@@ -26,7 +27,8 @@ async def test_get_all_accounts_by_authorised_user(
     await crud.account.create(obj_in=account_in)
     await crud.account.create(obj_in=account_in_2)
     r = await client.get(
-        f"{settings_test.API_V1_PREFIX}/accounts", headers=superadmin_token_headers
+        f"{settings_test.API_V1_PREFIX}/accounts",
+        headers=superadmin_token_headers,
     )
     assert 200 <= r.status_code < 300
     accounts = r.json()
@@ -34,21 +36,26 @@ async def test_get_all_accounts_by_authorised_user(
     accounts_created = 2
     assert len(accounts) == accounts_created + account_created_in_auto_init_db
     assert next(
-        account for account in accounts if (
-            account["name"] == account_name and account["description"] == account_description
+        account
+        for account in accounts
+        if (
+            account["name"] == account_name
+            and account["description"] == account_description
         )
     )
     assert next(
-        account for account in accounts if (
-            account["name"] == account_name_2 and account["description"] == account_description_2
+        account
+        for account in accounts
+        if (
+            account["name"] == account_name_2
+            and account["description"] == account_description_2
         )
     )
 
+
 @pytest.mark.asyncio
 async def test_create_account(
-    client: AsyncClient,
-    auto_init_db: Any,
-    superadmin_token_headers: dict
+    client: AsyncClient, auto_init_db: Any, superadmin_token_headers: dict
 ) -> None:
     account_name = faker_data.name()
     account_description = faker_data.paragraph()
