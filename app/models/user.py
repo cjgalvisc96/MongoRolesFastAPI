@@ -28,6 +28,18 @@ class User(Base):
     async def get_with_role_and_account(cls, *, user_id: str):
         pipeline = [
             {"$match": {"_id": ObjectId(user_id)}},
+            # join with accounts collection
+            {
+                "$lookup": {
+                    "from": "accounts",
+                    "localField": "account_id",
+                    "foreignField": "_id",
+                    "pipeline": [
+                        {"$project": {"name": 1}},
+                    ],
+                    "as": "account",
+                }
+            },
             # join with user_role collection
             {
                 "$lookup": {
