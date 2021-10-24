@@ -1,4 +1,5 @@
-from bson import ObjectId
+from typing import Dict, List
+
 from umongo import fields, validate
 
 from app.core.db import mongo_db
@@ -25,9 +26,9 @@ class User(Base):
         collection_name = "users"
 
     @classmethod
-    def get_with_account_and_role(cls, *, user_id: str):
+    def get_with_account_and_role(cls, *, _match: Dict) -> List[Dict]:
         pipeline = [
-            {"$match": {"_id": ObjectId(user_id)}},
+            _match,
             # join with accounts collection
             {
                 "$lookup": {

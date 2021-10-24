@@ -5,7 +5,7 @@ from bson import ObjectId
 from app.core.security import get_password_hash, verify_password
 from app.crud.base import CRUDBase
 from app.models.user import User
-from app.schemas.user import UserCreate, UserUpdate
+from app.schemas.user import UserCreate, UserInDB, UserUpdate
 
 
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
@@ -13,7 +13,15 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         self.model = User
 
     async def get_by_email(self, *, email: str) -> Optional[User]:
-        return await self.model.find_one({"email": email})
+        email_filter = {"email": email}
+        user_with_account_and_role = await self._get_with_account_and_role(
+            _filter=email_filter
+        )
+        if not user_with_account_and_role:
+            guest_user = await self.model.find_one(email_filter)
+            return guest_user
+
+        return user_with_account_and_role
 
     async def create(self, *, obj_in: UserCreate) -> User:
         create_data = obj_in.dict(exclude_unset=True)
@@ -63,13 +71,14 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         return response
 
     async def _get_with_account_and_role(
-        self, *, user_id: str
+        self, *, _filter: Dict
     ) -> Optional[User]:
+        _match = {"$match": _filter}
         user_with_role_and_account = {}
         async for user_found in self.model.get_with_account_and_role(
-            user_id=user_id
+            _match=_match
         ):
-            user_with_role_and_account = user_found
+            user_with_role_and_account = UserInDB(**user_found)
         return user_with_role_and_account
 
 

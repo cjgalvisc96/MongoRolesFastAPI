@@ -1,7 +1,7 @@
 from datetime import datetime
-from typing import Optional, Union
+from typing import Dict, Optional, Union
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 from app.schemas.validators import ObjectId
 
@@ -35,7 +35,7 @@ class UserUpdate(UserBase):
 
 
 class UserInDBBase(UserBase):
-    id: ObjectId
+    id: Optional[ObjectId]
     created_at: datetime
     updated_at: datetime
 
@@ -51,4 +51,7 @@ class User(UserInDBBase):
 
 # Additional properties stored in DB
 class UserInDB(UserInDBBase):
+    id: ObjectId = Field(alias="_id")
     hashed_password: str
+    account: Optional[Dict]
+    role: Optional[Dict]
