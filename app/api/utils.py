@@ -1,15 +1,16 @@
 from typing import Optional
 
-from app import models
+from app import crud, models
 
 
 async def get_role_name_from_user(user_id: str) -> Optional[models.Role]:
-    """
-    If not found role, by default is "GUEST"
-    """
-    user = await models.User.get_with_role_and_account(user_id=user_id)
+    deafult_role = "GUEST"
+    user = await crud.user._get_with_account_and_role(user_id=user_id)
+    if not user:
+        return deafult_role
+
     role = user.get("role")
     if not role:
-        return "GUEST"  # Default role
+        return deafult_role
 
-    return role[0]["name"]
+    return role["name"]

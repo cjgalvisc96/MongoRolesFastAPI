@@ -25,7 +25,7 @@ class User(Base):
         collection_name = "users"
 
     @classmethod
-    async def get_with_role_and_account(cls, *, user_id: str):
+    def get_with_account_and_role(cls, *, user_id: str):
         pipeline = [
             {"$match": {"_id": ObjectId(user_id)}},
             # join with accounts collection
@@ -40,40 +40,36 @@ class User(Base):
                     "as": "account",
                 }
             },
-            # join with user_role collection
+            {"$unwind": "$account"},
+            # join with user_roles collection
             {
                 "$lookup": {
                     "from": "user_roles",
                     "localField": "_id",
                     "foreignField": "user_id",
                     "pipeline": [
-                        {"$project": {"role_id": 1}},
+                        {"$project": {"role_id": 1, "user_id": 1}},
                     ],
                     "as": "user_role",
                 }
             },
-            # create temp vars
-            {"$addFields": {"temp_role_id": "$user_role.role_id"}},
-            # join with role collection
+            {"$unwind": "$user_role"},
+            # join with roles collection
             {
                 "$lookup": {
                     "from": "roles",
-                    "localField": "temp_role_id",
-                    "foreignField": "_id",
+                    "let": {"role_id": "$user_role.role_id"},
                     "pipeline": [
+                        {"$match": {"$expr": {"$eq": ["$_id", "$$role_id"]}}},
                         {"$project": {"name": 1}},
                     ],
                     "as": "role",
                 }
             },
-            # remove innecesary temp vars
-            {"$project": {"temp_role_id": 0}},
+            {"$unwind": "$role"},
+            {"$project": {"user_role": 0}},
         ]
-        user_with_role_and_account = {}
-        cursor = cls.collection.aggregate(pipeline)
-        async for document in cursor:
-            user_with_role_and_account = document
-        return user_with_role_and_account
+        return cls.collection.aggregate(pipeline)
 
     """
     from marshmallow import pre_load

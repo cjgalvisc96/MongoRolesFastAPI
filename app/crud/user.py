@@ -62,5 +62,15 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         response = [user_found async for user_found in users_found]
         return response
 
+    async def _get_with_account_and_role(
+        self, *, user_id: str
+    ) -> Optional[User]:
+        user_with_role_and_account = {}
+        async for user_found in self.model.get_with_account_and_role(
+            user_id=user_id
+        ):
+            user_with_role_and_account = user_found
+        return user_with_role_and_account
+
 
 user = CRUDUser()
