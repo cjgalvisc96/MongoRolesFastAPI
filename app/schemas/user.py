@@ -30,7 +30,7 @@ class UserUpdate(UserBase):
     is_active: Optional[bool]
     full_name: Optional[str]
     phone_number: Optional[str]
-    account_id: Optional[str]
+    account_id: Optional[Union[str, ObjectId]]
     password: Optional[str]
 
 
