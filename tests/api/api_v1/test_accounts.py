@@ -97,6 +97,90 @@ async def test_create_account(
 
 
 @pytest.mark.asyncio
+async def test_add_user_to_account(
+    client: AsyncClient, auto_init_db: Any, superadmin_token_headers: Dict
+) -> None:
+    account_name = faker_data.name()
+    account_description = faker_data.paragraph()
+    account_in = schemas.AccountCreate(
+        name=account_name, description=account_description
+    )
+    account = await crud.account.create(obj_in=account_in)
+    user = await crud.user.get_by_email(
+        email=settings_test.FIRST_SUPER_ADMIN_EMAIL
+    )
+    data = {"user_id": str(user.id)}
+    r = await client.post(
+        f"{settings_test.API_V1_PREFIX}/accounts/{str(account.id)}/users",
+        headers=superadmin_token_headers,
+        json=data,
+    )
+    user = r.json()
+    assert 200 <= r.status_code < 300
+    assert user["account_id"] == str(account.id)
+
+
+@pytest.mark.asyncio
+async def test_update_account(
+    client: AsyncClient, auto_init_db: Any, superadmin_token_headers: Dict
+) -> None:
+    account_name = faker_data.name()
+    account_description = faker_data.paragraph()
+    account_in = schemas.AccountCreate(
+        name=account_name, description=account_description
+    )
+    account = await crud.account.create(obj_in=account_in)
+    new_account_name = faker_data.name()
+    data = {"name": new_account_name}
+    r = await client.put(
+        f"{settings_test.API_V1_PREFIX}/accounts/{account.id}",
+        headers=superadmin_token_headers,
+        json=data,
+    )
+    updated_account = r.json()
+    assert 200 <= r.status_code < 300
+    assert updated_account["name"] == new_account_name
+
+
+@pytest.mark.asyncio
+async def test_remove_account(
+    client: AsyncClient, auto_init_db: Any, superadmin_token_headers: Dict
+) -> None:
+    account_name = faker_data.name()
+    account_description = faker_data.paragraph()
+    account_in = schemas.AccountCreate(
+        name=account_name, description=account_description
+    )
+    account = await crud.account.create(obj_in=account_in)
+    r = await client.delete(
+        f"{settings_test.API_V1_PREFIX}/accounts/{account.id}",
+        headers=superadmin_token_headers,
+    )
+    result = r.json()
+    assert 200 <= r.status_code < 300
+    assert result["success"] == f"Account with id={account.id} removed"
+
+
+@pytest.mark.asyncio
+async def test_partial_remove_account(
+    client: AsyncClient, auto_init_db: Any, superadmin_token_headers: Dict
+) -> None:
+    account_name = faker_data.name()
+    account_description = faker_data.paragraph()
+    account_in = schemas.AccountCreate(
+        name=account_name, description=account_description
+    )
+    account = await crud.account.create(obj_in=account_in)
+    r = await client.delete(
+        f"{settings_test.API_V1_PREFIX}/accounts/{account.id}/partial",
+        headers=superadmin_token_headers,
+    )
+    result = r.json()
+    assert 200 <= r.status_code < 300
+    assert not result.get("is_active")
+
+
+@pytest.mark.asyncio
 async def test_get_users_for_account_by_authorized_user(
     client: AsyncClient, auto_init_db: Any, superadmin_token_headers: Dict
 ) -> None:
