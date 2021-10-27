@@ -6,6 +6,7 @@ from httpx import AsyncClient
 
 from app import crud, schemas
 from tests.config import settings_test
+from tests.utils.validators import check_if_element_exists_in_list
 
 faker_data = Faker(locale=settings_test.FAKER_DATA_LOCATE)
 
@@ -29,11 +30,7 @@ async def test_get_all_roles_by_authorised_user(
     role_created_in_auto_init_db = 5
     roles_created = 1
     assert len(roles) == roles_created + role_created_in_auto_init_db
-    assert next(
-        role
-        for role in roles
-        if (
-            role["name"] == role_name
-            and role["description"] == role_description
-        )
+    role_conditions = {"name": role_name, "description": role_description}
+    assert check_if_element_exists_in_list(
+        _list=roles, _conditions=role_conditions
     )

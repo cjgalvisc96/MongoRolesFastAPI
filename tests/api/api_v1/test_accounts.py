@@ -7,6 +7,7 @@ from httpx import AsyncClient
 from app import crud, models, schemas
 from tests.config import settings_test
 from tests.utils.user import regular_user_email
+from tests.utils.validators import check_if_element_exists_in_list
 
 faker_data = Faker(locale=settings_test.FAKER_DATA_LOCATE)
 
@@ -36,21 +37,19 @@ async def test_get_all_accounts_by_authorised_user(
     account_created_in_auto_init_db = 1
     accounts_created = 2
     assert len(accounts) == accounts_created + account_created_in_auto_init_db
-    assert next(
-        account
-        for account in accounts
-        if (
-            account["name"] == account_name
-            and account["description"] == account_description
-        )
+    account_conditions = {
+        "name": account_name,
+        "description": account_description,
+    }
+    assert check_if_element_exists_in_list(
+        _list=accounts, _conditions=account_conditions
     )
-    assert next(
-        account
-        for account in accounts
-        if (
-            account["name"] == account_name_2
-            and account["description"] == account_description_2
-        )
+    account_conditions_2 = {
+        "name": account_name_2,
+        "description": account_description_2,
+    }
+    assert check_if_element_exists_in_list(
+        _list=accounts, _conditions=account_conditions_2
     )
 
 
@@ -266,5 +265,11 @@ async def test_get_users_for_own_account(
     users_created_in_auto_init_db = 1
     users_created = 2
     assert len(users) == users_created + users_created_in_auto_init_db
-    assert next(user for user in users if user["email"] == user_in.email)
-    assert next(user for user in users if user["email"] == user_in_2.email)
+    user_conditions = {"email": user_in.email}
+    assert check_if_element_exists_in_list(
+        _list=users, _conditions=user_conditions
+    )
+    user_conditions_2 = {"email": user_in_2.email}
+    assert check_if_element_exists_in_list(
+        _list=users, _conditions=user_conditions_2
+    )

@@ -6,11 +6,11 @@ from app import crud, models, schemas
 from app.api import deps
 from app.constants.role import Role
 
-router = APIRouter(prefix="/roles", tags=["roles"])
+router = APIRouter(prefix="/users", tags=["users"])
 
 
-@router.get("", response_model=List[schemas.Role])
-async def get_roles(
+@router.get("", response_model=List[schemas.User])
+async def get_users(
     skip: int = 0,
     limit: int = 100,
     current_user: models.User = Security(
@@ -19,7 +19,10 @@ async def get_roles(
     ),
 ) -> Any:
     """
-    Retrieve all available user roles.
+    Retrieve all users.
     """
-    roles = await crud.role.get_multi(skip=skip, limit=limit)
-    return roles
+    users = await crud.user.get_multi(
+        skip=skip,
+        limit=limit,
+    )
+    return users
