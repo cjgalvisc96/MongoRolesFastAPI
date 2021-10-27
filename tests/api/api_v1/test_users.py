@@ -1,7 +1,7 @@
-import pytest
-from bson.objectid import ObjectId
 from typing import Any, Dict
 
+import pytest
+from bson.objectid import ObjectId
 from faker import Faker
 from httpx import AsyncClient
 
@@ -43,7 +43,9 @@ async def test_get_all_users_by_authorised_user(
     user_conditions = {
         "email": user_email,
         "full_name": user_full_name,
-        "phone_number": user_phone_number,
+        "phone_number": str(user_phone_number),
         "account_id": str(user_account_id),
     }
-    assert check_if_element_exists_in_list(_list=users, _conditions=user_conditions)
+    assert check_if_element_exists_in_list(
+        _list=users, _conditions=user_conditions
+    )
