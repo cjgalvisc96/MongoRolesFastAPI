@@ -5,7 +5,7 @@ from bson.objectid import ObjectId
 from faker import Faker
 from httpx import AsyncClient
 
-from app import crud, schemas
+from app import crud, models, schemas
 from tests.config import settings_test
 from tests.utils.validators import check_if_element_exists_in_list
 
@@ -49,3 +49,34 @@ async def test_get_all_users_by_authorised_user(
     assert check_if_element_exists_in_list(
         _list=users, _conditions=user_conditions
     )
+
+
+@pytest.mark.asyncio
+async def test_create_user(
+    client: AsyncClient, auto_init_db: Any, superadmin_token_headers: Dict
+) -> None:
+    email = faker_data.email()
+    password = faker_data.password(length=12)
+    full_name = faker_data.name()
+    phone_number = faker_data.random_number(digits=10)
+    account_id = ObjectId()
+    data = {
+        "email": email,
+        "password": password,
+        "full_name": full_name,
+        "phone_number": phone_number,
+        "account_id": str(account_id),
+    }
+    r = await client.post(
+        f"{settings_test.API_V1_PREFIX}/users",
+        headers=superadmin_token_headers,
+        json=data,
+    )
+    assert 200 <= r.status_code < 300
+    user_created = r.json()
+    user_found = await crud.user.get_by_email(email=email)
+    assert type(user_found) is models.User
+    assert user_found.email == user_created["email"]
+    assert user_found.full_name == user_created["full_name"]
+    assert user_found.phone_number == user_created["phone_number"]
+    assert str(user_found.account_id) == user_created["account_id"]
