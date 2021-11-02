@@ -2,6 +2,7 @@ from typing import Any, Dict
 
 import pytest
 from faker import Faker
+from fastapi import status
 from httpx import AsyncClient
 
 from app import crud, schemas
@@ -25,7 +26,9 @@ async def test_get_all_roles_by_authorised_user(
         headers=superadmin_token_headers,
     )
 
-    assert 200 <= r.status_code < 300
+    assert (
+        status.HTTP_200_OK <= r.status_code < status.HTTP_300_MULTIPLE_CHOICES
+    )
     roles = r.json()
     role_created_in_auto_init_db = 5
     roles_created = 1

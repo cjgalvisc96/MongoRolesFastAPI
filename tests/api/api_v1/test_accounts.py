@@ -2,6 +2,7 @@ from typing import Any, Dict
 
 import pytest
 from faker import Faker
+from fastapi import status
 from httpx import AsyncClient
 
 from app import crud, models, schemas
@@ -32,7 +33,9 @@ async def test_get_all_accounts_by_authorised_user(
         f"{settings_test.API_V1_PREFIX}/accounts",
         headers=superadmin_token_headers,
     )
-    assert 200 <= r.status_code < 300
+    assert (
+        status.HTTP_200_OK <= r.status_code < status.HTTP_300_MULTIPLE_CHOICES
+    )
     accounts = r.json()
     account_created_in_auto_init_db = 1
     accounts_created = 2
@@ -71,7 +74,9 @@ async def test_get_account_for_user(
         headers=normal_user_token_headers,
     )
     user_account = r.json()
-    assert 200 <= r.status_code < 300
+    assert (
+        status.HTTP_200_OK <= r.status_code < status.HTTP_300_MULTIPLE_CHOICES
+    )
     assert user_account["id"] == str(account.id)
 
 
@@ -87,7 +92,9 @@ async def test_create_account(
         headers=superadmin_token_headers,
         json=data,
     )
-    assert 200 <= r.status_code < 300
+    assert (
+        status.HTTP_200_OK <= r.status_code < status.HTTP_300_MULTIPLE_CHOICES
+    )
     created_account = r.json()
     account = await crud.account.get_by_name(name=account_name)
     assert type(account) is models.Account
@@ -115,7 +122,9 @@ async def test_add_user_to_account(
         json=data,
     )
     user = r.json()
-    assert 200 <= r.status_code < 300
+    assert (
+        status.HTTP_200_OK <= r.status_code < status.HTTP_300_MULTIPLE_CHOICES
+    )
     assert user["account_id"] == str(account.id)
 
 
@@ -137,7 +146,9 @@ async def test_update_account(
         json=data,
     )
     updated_account = r.json()
-    assert 200 <= r.status_code < 300
+    assert (
+        status.HTTP_200_OK <= r.status_code < status.HTTP_300_MULTIPLE_CHOICES
+    )
     assert updated_account["name"] == new_account_name
 
 
@@ -156,7 +167,9 @@ async def test_remove_account(
         headers=superadmin_token_headers,
     )
     result = r.json()
-    assert 200 <= r.status_code < 300
+    assert (
+        status.HTTP_200_OK <= r.status_code < status.HTTP_300_MULTIPLE_CHOICES
+    )
     assert result["success"] == f"Account with id={account.id} removed"
 
 
@@ -175,7 +188,9 @@ async def test_partial_remove_account(
         headers=superadmin_token_headers,
     )
     result = r.json()
-    assert 200 <= r.status_code < 300
+    assert (
+        status.HTTP_200_OK <= r.status_code < status.HTTP_300_MULTIPLE_CHOICES
+    )
     assert not result.get("is_active")
 
 
@@ -210,7 +225,9 @@ async def test_get_users_for_account_by_authorized_user(
         headers=superadmin_token_headers,
     )
     users = r.json()
-    assert 200 <= r.status_code < 300
+    assert (
+        status.HTTP_200_OK <= r.status_code < status.HTTP_300_MULTIPLE_CHOICES
+    )
     assert len(users) == 2
 
 
@@ -260,7 +277,9 @@ async def test_get_users_for_own_account(
         f"{settings_test.API_V1_PREFIX}/accounts/users/me",
         headers=superadmin_token_headers,
     )
-    assert 200 <= r.status_code < 300
+    assert (
+        status.HTTP_200_OK <= r.status_code < status.HTTP_300_MULTIPLE_CHOICES
+    )
     users = r.json()
     users_created_in_auto_init_db = 1
     users_created = 2
