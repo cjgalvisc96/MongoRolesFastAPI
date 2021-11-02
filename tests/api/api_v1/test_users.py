@@ -93,7 +93,6 @@ async def test_partial_remove_account(
     client: AsyncClient, auto_init_db: Any, superadmin_token_headers: Dict
 ) -> None:
     email = faker_data.email()
-    email = faker_data.email()
     password = faker_data.password(length=12)
     full_name = faker_data.name()
     phone_number = faker_data.random_number(digits=10)
@@ -131,3 +130,31 @@ async def test_partial_remove_account_not_user_exists(
     assert (
         result["detail"] == f"User wit id <<{user_id_not_exists}>> not exists"
     )
+
+
+@pytest.mark.asyncio
+async def test_remove_user(
+    client: AsyncClient, auto_init_db: Any, superadmin_token_headers: Dict
+) -> None:
+    email = faker_data.email()
+    password = faker_data.password(length=12)
+    full_name = faker_data.name()
+    phone_number = faker_data.random_number(digits=10)
+    account_id = ObjectId()
+    user_in = schemas.UserCreate(
+        email=email,
+        password=password,
+        full_name=full_name,
+        phone_number=phone_number,
+        account_id=str(account_id),
+    )
+    user = await crud.user.create(obj_in=user_in)
+    r = await client.delete(
+        f"{settings_test.API_V1_PREFIX}/users/{user.id}",
+        headers=superadmin_token_headers,
+    )
+    result = r.json()
+    assert (
+        status.HTTP_200_OK <= r.status_code < status.HTTP_300_MULTIPLE_CHOICES
+    )
+    assert result["success"] == f"User with id <<{user.id}>> removed"
