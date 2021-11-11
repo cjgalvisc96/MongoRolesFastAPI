@@ -8,6 +8,7 @@ from app.api import deps
 from app.api.api_v1.error_messages import users_error_messages
 from app.api.api_v1.success_messages import users_success_messages
 from app.constants.role import Role
+from app.core.config import settings
 from app.schemas.validators import ObjectId
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -29,6 +30,21 @@ async def get_users(
         skip=skip,
         limit=limit,
     )
+    return users
+
+
+@router.get("/{user_id}", response_model=schemas.User)
+async def get_user_by_id(
+    user_id: ObjectId,
+    current_user: models.User = Security(
+        deps.get_current_active_user,
+        scopes=[Role.ADMIN["name"], Role.SUPER_ADMIN["name"]],
+    ),
+) -> Any:
+    """
+    Retrieve one user by user_id.
+    """
+    users = await crud.user.get(_id=user_id)
     return users
 
 
@@ -118,7 +134,7 @@ async def remove_user(
     }
 
 
-@router.post("/{user_id}", response_model=schemas.User)
+@router.put("/{user_id}", response_model=schemas.User)
 async def update_user(
     *,
     user_id: ObjectId,
@@ -142,4 +158,29 @@ async def update_user(
             ),
         )
     user = await crud.user._update(_id=user_id, obj_in=user_in)
+    return user
+
+
+@router.post("/open", response_model=schemas.User)
+async def create_user_open(
+    *,
+    user_in: schemas.UserCreate,
+) -> Any:
+    """
+    Create new user without the need to be logged in.
+    """
+    if not settings.USERS_OPEN_REGISTRATION:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=users_error_messages["created_user_open_not_allowed"],
+        )
+    user = await crud.user.get_by_email(email=user_in.email)
+    if user:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=users_error_messages[
+                "user_with_email_already_exists"
+            ].format(email=user_in.email),
+        )
+    user = await crud.user.create(obj_in=user_in)
     return user

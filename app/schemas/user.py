@@ -12,7 +12,7 @@ class UserBase(BaseModel):
     is_active: bool = True
     full_name: str
     phone_number: str
-    account_id: Union[str, ObjectId]
+    account_id: Optional[Union[str, ObjectId]]
 
     class Config:
         orm_mode = True
@@ -30,7 +30,6 @@ class UserUpdate(UserBase):
     is_active: Optional[bool]
     full_name: Optional[str]
     phone_number: Optional[str]
-    account_id: Optional[Union[str, ObjectId]]
     password: Optional[str]
 
 

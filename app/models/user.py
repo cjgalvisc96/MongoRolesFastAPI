@@ -20,7 +20,9 @@ class User(Base):
     hashed_password = fields.StringField(
         validate=validate.Length(max=255), required=True
     )
-    account_id = fields.ObjectIdField(allow_none=True, required=True)
+    account_id = fields.ObjectIdField(
+        default=None, allow_none=True, required=False
+    )
 
     class Meta:
         collection_name = "users"
