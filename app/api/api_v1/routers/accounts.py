@@ -97,7 +97,7 @@ async def add_user_to_account(
     return updated_user
 
 
-@router.put("/{account_id}", response_model=schemas.Account)
+@router.post("/{account_id}", response_model=schemas.Account)
 async def update_account(
     *,
     account_id: ObjectId,

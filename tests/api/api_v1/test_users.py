@@ -7,6 +7,7 @@ from fastapi import status
 from httpx import AsyncClient
 
 from app import crud, models, schemas
+from app.core.security import verify_password
 from tests.config import settings_test
 from tests.utils.validators import check_if_element_exists_in_list
 
@@ -89,7 +90,7 @@ async def test_create_user(
 
 
 @pytest.mark.asyncio
-async def test_partial_remove_account(
+async def test_partial_remove_user(
     client: AsyncClient, auto_init_db: Any, superadmin_token_headers: Dict
 ) -> None:
     email = faker_data.email()
@@ -117,7 +118,7 @@ async def test_partial_remove_account(
 
 
 @pytest.mark.asyncio
-async def test_partial_remove_account_not_user_exists(
+async def test_partial_remove_user_not_user_exists(
     client: AsyncClient, auto_init_db: Any, superadmin_token_headers: Dict
 ) -> None:
     user_id_not_exists = str(ObjectId())
@@ -158,3 +159,51 @@ async def test_remove_user(
         status.HTTP_200_OK <= r.status_code < status.HTTP_300_MULTIPLE_CHOICES
     )
     assert result["success"] == f"User with id <<{user.id}>> removed"
+
+
+@pytest.mark.asyncio
+async def test_update_user(
+    client: AsyncClient, auto_init_db: Any, superadmin_token_headers: Dict
+) -> None:
+    email = faker_data.email()
+    password = faker_data.password(length=12)
+    full_name = faker_data.name()
+    phone_number = faker_data.random_number(digits=10)
+    account_id = ObjectId()
+    user_in = schemas.UserCreate(
+        email=email,
+        password=password,
+        full_name=full_name,
+        phone_number=phone_number,
+        account_id=str(account_id),
+    )
+    user = await crud.user.create(obj_in=user_in)
+
+    new_user_email = faker_data.email()
+    new_user_password = faker_data.password(length=12)
+    new_user_full_name = faker_data.name()
+    new_user_phone_number = faker_data.random_number(digits=10)
+    data = dict(
+        email=new_user_email,
+        password=new_user_password,
+        full_name=new_user_full_name,
+        phone_number=new_user_phone_number,
+    )
+
+    r = await client.post(
+        f"{settings_test.API_V1_PREFIX}/users/{user.id}",
+        headers=superadmin_token_headers,
+        json=data,
+    )
+    updated_user = r.json()
+    assert (
+        status.HTTP_200_OK <= r.status_code < status.HTTP_300_MULTIPLE_CHOICES
+    )
+    assert updated_user["email"] == new_user_email
+    assert updated_user["full_name"] == new_user_full_name
+    assert updated_user["phone_number"] == str(new_user_phone_number)
+    user_found = await crud.user.get_by_email(email=new_user_email)
+    assert verify_password(
+        plain_password=new_user_password,
+        hashed_password=user_found.hashed_password,
+    )

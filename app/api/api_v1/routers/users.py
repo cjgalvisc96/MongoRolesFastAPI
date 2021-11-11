@@ -116,3 +116,30 @@ async def remove_user(
             user_id=user_id
         ),
     }
+
+
+@router.post("/{user_id}", response_model=schemas.User)
+async def update_user(
+    *,
+    user_id: ObjectId,
+    user_in: schemas.UserUpdate,
+    current_user: models.User = Security(
+        deps.get_current_active_user,
+        scopes=[
+            Role.SUPER_ADMIN["name"],
+        ],
+    ),
+) -> Any:
+    """
+    Update an user.
+    """
+    user = await crud.user.get(_id=user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=users_error_messages["user_not_exists"].format(
+                user_id=user_id
+            ),
+        )
+    user = await crud.user._update(_id=user_id, obj_in=user_in)
+    return user

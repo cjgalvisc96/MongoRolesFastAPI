@@ -140,7 +140,7 @@ async def test_update_account(
     account = await crud.account.create(obj_in=account_in)
     new_account_name = faker_data.name()
     data = {"name": new_account_name}
-    r = await client.put(
+    r = await client.post(
         f"{settings_test.API_V1_PREFIX}/accounts/{account.id}",
         headers=superadmin_token_headers,
         json=data,
