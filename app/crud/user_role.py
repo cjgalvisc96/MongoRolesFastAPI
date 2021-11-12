@@ -12,7 +12,9 @@ class CRUDUserRole(CRUDBase[UserRole, UserRoleCreate, UserRoleUpdate]):
         self.model = UserRole
 
     async def get_by_user_id(self, *, user_id: str) -> Optional[UserRole]:
-        return await self.model.find_one({"user_id": ObjectId(user_id)})
+        return await self.model.find_one(
+            {"user_id": ObjectId(user_id), "is_active": True}
+        )
 
 
 user_role = CRUDUserRole()

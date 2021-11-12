@@ -102,7 +102,9 @@ async def test_partial_remove_user_role(client: AsyncClient) -> None:
     user_role = await crud.user_role.create(obj_in=user_role_in)
     user_role_id = user_role.id
     await crud.user_role.partial_remove(_id=user_role_id)
-    found_user_role_removed = await crud.user_role.get(_id=user_role_id)
+    found_user_role_removed = await crud.user_role.get_not_active(
+        _id=user_role_id
+    )
     assert str(found_user_role_removed.user_id) == user_id
     assert str(found_user_role_removed.role_id) == role_id
     assert not found_user_role_removed.is_active

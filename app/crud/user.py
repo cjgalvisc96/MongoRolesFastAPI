@@ -13,7 +13,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         self.model = User
 
     async def get_by_email(self, *, email: str) -> Optional[User]:
-        email_filter = {"email": email}
+        email_filter = {"email": email, "is_active": True}
         user_with_account_and_role = await self._get_with_account_and_role(
             _filter=email_filter
         )
@@ -62,7 +62,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         limit: int = 100,
     ) -> List[User]:
         users_found = (
-            self.model.find({"account_id": account_id})
+            self.model.find({"account_id": account_id, "is_active": True})
             .sort("name", -1)
             .skip(skip)
             .limit(limit)

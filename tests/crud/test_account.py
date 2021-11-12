@@ -115,7 +115,7 @@ async def test_partial_remove_account(client: AsyncClient) -> None:
     account = await crud.account.create(obj_in=account_in)
     account_id = account.id
     await crud.account.partial_remove(_id=account_id)
-    found_account_removed = await crud.account.get(_id=account_id)
+    found_account_removed = await crud.account.get_not_active(_id=account_id)
     assert type(found_account_removed) is Account
     assert hasattr(found_account_removed, "name")
     assert hasattr(found_account_removed, "description")

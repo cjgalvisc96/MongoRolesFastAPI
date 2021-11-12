@@ -17,16 +17,28 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         self, *, skip: int = 0, limit: int = 100
     ) -> List[ModelType]:
         objects = []
-        cursor = self.model.find().sort("name", -1).skip(skip).limit(limit)
+        cursor = (
+            self.model.find({"is_active": True})
+            .sort("name", -1)
+            .skip(skip)
+            .limit(limit)
+        )
         async for document in cursor:
             objects.append(document)
         return objects
 
     async def get(self, *, _id: str) -> Optional[ModelType]:
-        return await self.model.find_one({"_id": ObjectId(_id)})
+        return await self.model.find_one(
+            {"_id": ObjectId(_id), "is_active": True}
+        )
+
+    async def get_not_active(self, *, _id: str) -> Optional[ModelType]:
+        return await self.model.find_one(
+            {"_id": ObjectId(_id), "is_active": False}
+        )
 
     async def get_by_name(self, *, name: str) -> Optional[ModelType]:
-        return await self.model.find_one({"name": name})
+        return await self.model.find_one({"name": name, "is_active": True})
 
     async def create(self, *, obj_in: CreateSchemaType) -> ModelType:
         obj_in_data = jsonable_encoder(obj_in)
