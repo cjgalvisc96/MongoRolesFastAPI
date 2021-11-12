@@ -13,7 +13,6 @@ from tests.config import settings_test
 faker_data = Faker(locale=settings_test.FAKER_DATA_LOCATE)
 
 
-
 @pytest.mark.asyncio
 async def test_assign_user_role(
     client: AsyncClient, auto_init_db: Any, superadmin_token_headers: Dict
@@ -58,7 +57,9 @@ async def test_update_user_role(
     user = await crud.user.create(obj_in=user_in)
 
     role = await crud.role.get_by_name(name=Role.ACCOUNT_MANAGER["name"])
-    user_role_in = schemas.UserRoleCreate(user_id=str(user.id), role_id=str(role.id))
+    user_role_in = schemas.UserRoleCreate(
+        user_id=str(user.id), role_id=str(role.id)
+    )
     await crud.user_role.create(obj_in=user_role_in)
     new_role = await crud.role.get_by_name(name=Role.ACCOUNT_ADMIN["name"])
     data = {"role_id": str(new_role.id)}
