@@ -44,8 +44,27 @@ class UserInDBBase(UserBase):
 
 
 # Additional properties to return via API
+class UserRole(BaseModel):
+    id: ObjectId = Field(alias="_id")
+    name: str
+
+    class Config:
+        orm_mode = True
+        json_encoders = {ObjectId: str}
+
+
+class UserAccount(BaseModel):
+    id: ObjectId = Field(alias="_id")
+    name: str
+
+    class Config:
+        orm_mode = True
+        json_encoders = {ObjectId: str}
+
+
 class User(UserInDBBase):
-    pass
+    role: Optional[UserRole]
+    account: Optional[UserAccount]
 
 
 # Additional properties stored in DB

@@ -1,12 +1,13 @@
 from typing import Any, Dict, List
 
-from fastapi import APIRouter, HTTPException, Security
+from fastapi import APIRouter, Depends, HTTPException, Security
 from starlette import status
 
 from app import crud, models, schemas
 from app.api import deps
 from app.api.api_v1.error_messages import users_error_messages
 from app.api.api_v1.success_messages import users_success_messages
+from app.api.utils import get_user_schema_with_role_and_account
 from app.constants.role import Role
 from app.core.config import settings
 from app.schemas.validators import ObjectId
@@ -33,19 +34,14 @@ async def get_users(
     return users
 
 
-@router.get("/{user_id}", response_model=schemas.User)
-async def get_user_by_id(
-    user_id: ObjectId,
-    current_user: models.User = Security(
-        deps.get_current_active_user,
-        scopes=[Role.ADMIN["name"], Role.SUPER_ADMIN["name"]],
-    ),
+@router.get("/me", response_model=schemas.User)
+async def get_me_user(
+    current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
-    Retrieve one user by user_id.
+    Get current user.
     """
-    users = await crud.user.get(_id=user_id)
-    return users
+    return get_user_schema_with_role_and_account(user=current_user)
 
 
 @router.post("", response_model=schemas.User)
@@ -60,6 +56,31 @@ async def create_user(
     """
     Create new user.
     """
+    user = await crud.user.get_by_email(email=user_in.email)
+    if user:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=users_error_messages[
+                "user_with_email_already_exists"
+            ].format(email=user_in.email),
+        )
+    user = await crud.user.create(obj_in=user_in)
+    return user
+
+
+@router.post("/open", response_model=schemas.User)
+async def create_user_open(
+    *,
+    user_in: schemas.UserCreate,
+) -> Any:
+    """
+    Create new user without the need to be logged in.
+    """
+    if not settings.USERS_OPEN_REGISTRATION:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=users_error_messages["created_user_open_not_allowed"],
+        )
     user = await crud.user.get_by_email(email=user_in.email)
     if user:
         raise HTTPException(
@@ -134,7 +155,7 @@ async def remove_user(
     }
 
 
-@router.put("/{user_id}", response_model=schemas.User)
+@router.post("/{user_id}", response_model=schemas.User)
 async def update_user(
     *,
     user_id: ObjectId,
@@ -161,26 +182,16 @@ async def update_user(
     return user
 
 
-@router.post("/open", response_model=schemas.User)
-async def create_user_open(
-    *,
-    user_in: schemas.UserCreate,
+@router.get("/{user_id}", response_model=schemas.User)
+async def get_user_by_id(
+    user_id: ObjectId,
+    current_user: models.User = Security(
+        deps.get_current_active_user,
+        scopes=[Role.ADMIN["name"], Role.SUPER_ADMIN["name"]],
+    ),
 ) -> Any:
     """
-    Create new user without the need to be logged in.
+    Retrieve one user by user_id.
     """
-    if not settings.USERS_OPEN_REGISTRATION:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=users_error_messages["created_user_open_not_allowed"],
-        )
-    user = await crud.user.get_by_email(email=user_in.email)
-    if user:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=users_error_messages[
-                "user_with_email_already_exists"
-            ].format(email=user_in.email),
-        )
-    user = await crud.user.create(obj_in=user_in)
-    return user
+    user = await crud.user.get(_id=user_id)
+    return get_user_schema_with_role_and_account(user=user)

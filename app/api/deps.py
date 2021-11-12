@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from fastapi import Depends, HTTPException, Security, status
 from fastapi.security import OAuth2PasswordBearer, SecurityScopes
@@ -9,6 +10,7 @@ from app import crud, models, schemas
 from app.constants.role import Role
 from app.core import security
 from app.core.config import settings
+from app.schemas.validators import ObjectId
 
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_PREFIX}/auth/access-token",
@@ -51,7 +53,8 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
         )
-    user = await crud.user.get(_id=token_data.id)
+
+    user = await get_host_or_guest_user(user_id=token_data.id)
     if not user:
         raise credentials_exception
     if security_scopes.scopes and not token_data.role:
@@ -79,8 +82,19 @@ async def get_current_active_user(
         scopes=[],
     ),
 ) -> models.User:
-    if not current_user.is_active:
+    if not (hasattr(current_user, "is_active") or current_user.is_active):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user"
         )
     return current_user
+
+
+async def get_host_or_guest_user(
+    *, user_id: ObjectId
+) -> Optional[models.User]:
+    # HOST user
+    user = await crud.user._get_with_account_and_role(_filter={"_id": user_id})
+    if not user:
+        # GUEST user
+        user = await crud.user.get(_id=str(user_id))
+    return user

@@ -9,6 +9,7 @@ from httpx import AsyncClient
 from app import crud, models, schemas
 from app.core.security import verify_password
 from tests.config import settings_test
+from tests.utils.user import regular_user_email
 from tests.utils.validators import check_if_element_exists_in_list
 
 faker_data = Faker(locale=settings_test.FAKER_DATA_LOCATE)
@@ -229,7 +230,7 @@ async def test_update_user(
         phone_number=new_user_phone_number,
     )
 
-    r = await client.put(
+    r = await client.post(
         f"{settings_test.API_V1_PREFIX}/users/{user.id}",
         headers=superadmin_token_headers,
         json=data,
@@ -281,3 +282,35 @@ async def test_create_user_open(
         plain_password=password,
         hashed_password=user_found.hashed_password,
     )
+
+
+@pytest.mark.asyncio
+async def test_get_me_user_super_admin(
+    client: AsyncClient, auto_init_db: Any, superadmin_token_headers: Dict
+) -> None:
+    r = await client.get(
+        f"{settings_test.API_V1_PREFIX}/users/me",
+        headers=superadmin_token_headers,
+    )
+    current_user = r.json()
+    assert current_user
+    assert current_user["is_active"] is True
+    assert current_user["email"] == settings_test.FIRST_SUPER_ADMIN_EMAIL
+    assert current_user["role"]
+    assert current_user["account"]
+
+
+@pytest.mark.asyncio
+async def test_get_me_user_normal_user(
+    client: AsyncClient, auto_init_db: Any, normal_user_token_headers: Dict
+) -> None:
+    r = await client.get(
+        f"{settings_test.API_V1_PREFIX}/users/me",
+        headers=normal_user_token_headers,
+    )
+    current_user = r.json()
+    assert current_user
+    assert current_user["is_active"] is True
+    assert current_user["email"] == regular_user_email
+    assert not current_user["role"]
+    assert not current_user["account"]
