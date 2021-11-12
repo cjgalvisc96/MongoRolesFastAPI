@@ -33,11 +33,7 @@ async def login_access_token(
         minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
 
-    if not hasattr(user, "role"):
-        role = "GUEST"
-    else:
-        role = user.role.get("name")
-
+    role = "GUEST" if not hasattr(user, "role") else user.role.get("name")
     token_payload = {
         "id": str(user.id),
         "role": role,
