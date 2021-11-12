@@ -314,3 +314,30 @@ async def test_get_me_user_normal_user(
     assert current_user["email"] == regular_user_email
     assert not current_user["role"]
     assert not current_user["account"]
+
+
+@pytest.mark.asyncio
+async def test_update_me_user(
+    client: AsyncClient, auto_init_db: Any, normal_user_token_headers: Dict
+) -> None:
+    new_user_email = faker_data.email()
+    new_user_full_name = faker_data.name()
+    new_user_phone_number = faker_data.random_number(digits=10)
+    data = dict(
+        email=new_user_email,
+        full_name=new_user_full_name,
+        phone_number=new_user_phone_number,
+    )
+
+    r = await client.post(
+        f"{settings_test.API_V1_PREFIX}/users/me",
+        headers=normal_user_token_headers,
+        json=data,
+    )
+    updated_user = r.json()
+    assert (
+        status.HTTP_200_OK <= r.status_code < status.HTTP_300_MULTIPLE_CHOICES
+    )
+    assert updated_user["email"] == new_user_email
+    assert updated_user["full_name"] == new_user_full_name
+    assert updated_user["phone_number"] == str(new_user_phone_number)

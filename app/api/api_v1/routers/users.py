@@ -1,6 +1,8 @@
 from typing import Any, Dict, List
 
-from fastapi import APIRouter, Depends, HTTPException, Security
+from fastapi import APIRouter, Body, Depends, HTTPException, Security
+from fastapi.encoders import jsonable_encoder
+from pydantic.networks import EmailStr
 from starlette import status
 
 from app import crud, models, schemas
@@ -42,6 +44,29 @@ async def get_me_user(
     Get current user.
     """
     return get_user_schema_with_role_and_account(user=current_user)
+
+
+@router.post("/me", response_model=schemas.User)
+async def update_me_user(
+    *,
+    full_name: str = Body(None),
+    phone_number: str = Body(None),
+    email: EmailStr = Body(None),
+    current_user: models.User = Depends(deps.get_current_active_user),
+) -> Any:
+    """
+    Update own user.
+    """
+    current_user_data = jsonable_encoder(current_user)
+    user_in = schemas.UserUpdate(**current_user_data)
+    if phone_number is not None:
+        user_in.phone_number = phone_number
+    if full_name is not None:
+        user_in.full_name = full_name
+    if email is not None:
+        user_in.email = email
+    user = await crud.user._update(_id=str(current_user.id), obj_in=user_in)
+    return user
 
 
 @router.post("", response_model=schemas.User)
