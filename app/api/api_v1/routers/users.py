@@ -221,4 +221,11 @@ async def get_user_by_id(
     Retrieve one user by user_id.
     """
     user = await crud.user.get(_id=user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=users_error_messages["user_not_exists"].format(
+                user_id=user_id
+            ),
+        )
     return get_user_schema_with_role_and_account(user=user)

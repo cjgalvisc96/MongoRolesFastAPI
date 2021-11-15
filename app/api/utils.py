@@ -12,9 +12,6 @@ def is_valid_object_id(value):
 def get_user_schema_with_role_and_account(
     *, user: models.User
 ) -> Optional[schemas.User]:
-    if not user:
-        return None
-
     if not (hasattr(user, "role") and hasattr(user, "account")):
         # GUEST user
         role = None

@@ -97,6 +97,35 @@ async def test_get_user_by_id(
 
 
 @pytest.mark.asyncio
+async def test_get_user_by_id_without_exists_user(
+    client: AsyncClient, auto_init_db: Any, superadmin_token_headers: Dict
+) -> None:
+    random_user_id = str(ObjectId())
+    r = await client.get(
+        f"{settings_test.API_V1_PREFIX}/users/{random_user_id}",
+        headers=superadmin_token_headers,
+    )
+    assert r.status_code == status.HTTP_404_NOT_FOUND
+    user = r.json()
+    expected_error_message = f"User with id <<{random_user_id}>> not exists"
+    assert user["detail"] == expected_error_message
+
+
+@pytest.mark.asyncio
+async def test_get_user_by_id_with_invalid_user_id(
+    client: AsyncClient, auto_init_db: Any, superadmin_token_headers: Dict
+) -> None:
+    random_user_id = str(faker_data.random_number(digits=10))
+    r = await client.get(
+        f"{settings_test.API_V1_PREFIX}/users/{random_user_id}",
+        headers=superadmin_token_headers,
+    )
+    assert r.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    user = r.json()
+    assert user["detail"][0]["msg"] == "Not a valid ObjectId"
+
+
+@pytest.mark.asyncio
 async def test_create_user(
     client: AsyncClient, auto_init_db: Any, superadmin_token_headers: Dict
 ) -> None:

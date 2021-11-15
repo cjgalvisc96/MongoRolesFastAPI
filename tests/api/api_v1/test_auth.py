@@ -49,6 +49,21 @@ async def test_login_access_token_without_exists_user(
 
 
 @pytest.mark.asyncio
+async def test_login_access_token_with_invalid_password(
+    client: AsyncClient, auto_init_db: Any
+) -> None:
+    login_data = {
+        "username": settings_test.FIRST_SUPER_ADMIN_EMAIL,
+        "password": faker_data.password(length=12),
+    }
+    r = await client.post(
+        f"{settings_test.API_V1_PREFIX}/auth/access-token", data=login_data
+    )
+    result = r.json()
+    assert result["detail"] == "Incorrect email or password"
+
+
+@pytest.mark.asyncio
 async def test_hash_password(
     client: AsyncClient,
     auto_init_db: Any,
