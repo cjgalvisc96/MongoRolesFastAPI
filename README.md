@@ -34,7 +34,10 @@
     ```sh
     >>[DirProject] docker-compose run web pytest --cov=app/ tests --disable-warnings
     ```
-   
+## Coverage report
+
+![image](https://user-images.githubusercontent.com/26173643/141831076-138603be-59a0-4bda-9fbc-ccb0d16f18ff.png)
+
 
 
 ## Tech
