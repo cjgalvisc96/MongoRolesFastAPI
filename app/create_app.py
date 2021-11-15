@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.api_v1.api import api_router
 from app.core.config import settings
 from app.core.db import mongo_db
+from app.db.init_db import init_db
 
 
 def add_db(app, config_db):
@@ -13,6 +14,7 @@ def add_db(app, config_db):
     @app.on_event("startup")
     async def startup() -> None:
         app.state.db_instance = mongo_db.init_db()
+        await init_db()  # Add initial data
 
 
 def ping_router(app):

@@ -206,7 +206,7 @@ async def test_partial_remove_user(client: AsyncClient) -> None:
     user = await crud.user.create(obj_in=user_in)
     user_id = user.id
     await crud.user.partial_remove(_id=user_id)
-    found_user_removed = await crud.user.get(_id=user_id)
+    found_user_removed = await crud.user.get_not_active(_id=user_id)
     assert type(found_user_removed) is User
     assert found_user_removed.email == fake_email
     assert found_user_removed.full_name == fake_full_name

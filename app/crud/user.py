@@ -5,7 +5,7 @@ from bson import ObjectId
 from app.core.security import get_password_hash, verify_password
 from app.crud.base import CRUDBase
 from app.models.user import User
-from app.schemas.user import UserCreate, UserUpdate
+from app.schemas.user import UserCreate, UserInDB, UserUpdate
 
 
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
@@ -13,7 +13,15 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         self.model = User
 
     async def get_by_email(self, *, email: str) -> Optional[User]:
-        return await self.model.find_one({"email": email})
+        email_filter = {"email": email, "is_active": True}
+        user_with_account_and_role = await self._get_with_account_and_role(
+            _filter=email_filter
+        )
+        if not user_with_account_and_role:
+            guest_user = await self.model.find_one(email_filter)
+            return guest_user
+
+        return user_with_account_and_role
 
     async def create(self, *, obj_in: UserCreate) -> User:
         create_data = obj_in.dict(exclude_unset=True)
@@ -36,8 +44,10 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             update_data["hashed_password"] = hashed_password
         return await super()._update(_id=_id, obj_in=update_data)
 
-    def authenticate(self, *, email: str, password: str) -> Optional[User]:
-        user = self.get_by_email(email=email)
+    async def authenticate(
+        self, *, email: str, password: str
+    ) -> Optional[User]:
+        user = await self.get_by_email(email=email)
         if not user:
             return None
         if not verify_password(password, user.hashed_password):
@@ -52,13 +62,24 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         limit: int = 100,
     ) -> List[User]:
         users_found = (
-            self.model.find({"account_id": account_id})
+            self.model.find({"account_id": account_id, "is_active": True})
             .sort("name", -1)
             .skip(skip)
             .limit(limit)
         )
         response = [user_found async for user_found in users_found]
         return response
+
+    async def _get_with_account_and_role(
+        self, *, _filter: Dict
+    ) -> Optional[User]:
+        _match = {"$match": _filter}
+        user_with_role_and_account = {}
+        async for user_found in self.model.get_with_account_and_role(
+            _match=_match
+        ):
+            user_with_role_and_account = UserInDB(**user_found)
+        return user_with_role_and_account
 
 
 user = CRUDUser()

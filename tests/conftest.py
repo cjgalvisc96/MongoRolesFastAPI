@@ -1,12 +1,18 @@
 import asyncio
-from typing import Any, Generator
+from typing import Any, Dict, Generator
 
 import pytest
 from httpx import AsyncClient
 
 from app.core.db import mongo_db
 from app.create_app import create_app
+from app.db.init_db import init_db
 from tests.config import settings_test
+from tests.utils.user import (
+    authentication_token_from_email,
+    get_superadmin_token_headers,
+    regular_user_email,
+)
 
 
 @pytest.fixture(scope="session")
@@ -31,6 +37,23 @@ def db():
     return mongo_db.db_instance
 
 
+@pytest.fixture()
+async def auto_init_db():
+    await init_db()
+
+
 @pytest.fixture(autouse=True)
 async def clean_db(client: AsyncClient, db: Any):
     await db.command("dropDatabase")
+
+
+@pytest.fixture()
+async def superadmin_token_headers(client: AsyncClient) -> Dict[str, str]:
+    return await get_superadmin_token_headers(client=client)
+
+
+@pytest.fixture()
+async def normal_user_token_headers(client: AsyncClient) -> Dict[str, str]:
+    return await authentication_token_from_email(
+        client=client, email=regular_user_email
+    )

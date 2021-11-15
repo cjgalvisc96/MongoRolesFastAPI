@@ -103,7 +103,7 @@ async def test_partial_remove_role(client: AsyncClient) -> None:
     role = await crud.role.create(obj_in=role_in)
     role_id = role.id
     await crud.role.partial_remove(_id=role_id)
-    found_role_removed = await crud.role.get(_id=role_id)
+    found_role_removed = await crud.role.get_not_active(_id=role_id)
     assert type(found_role_removed) is Role
     assert hasattr(found_role_removed, "name")
     assert hasattr(found_role_removed, "description")

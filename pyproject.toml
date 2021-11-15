@@ -13,6 +13,7 @@ umongo = "^3.0.0"
 motor = "^2.5.1"
 python-jose = "^3.3.0"
 passlib = "^1.7.4"
+python-multipart = "^0.0.5"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
@@ -31,7 +32,7 @@ Faker = "^9.0.0"
 [tool.isort]
 use_parentheses = true
 reverse_relative = true
-include_trailing_comma = false
+include_trailing_comma = true
 lines_between_types = 0
 multi_line_output = 3
 line_length = 79

@@ -1,9 +1,8 @@
 from datetime import datetime
-from typing import Optional
+from typing import Dict, Optional, Union
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
-from app.schemas.user_role import UserRole
 from app.schemas.validators import ObjectId
 
 
@@ -13,7 +12,7 @@ class UserBase(BaseModel):
     is_active: bool = True
     full_name: str
     phone_number: str
-    account_id: str
+    account_id: Optional[Union[str, ObjectId]]
 
     class Config:
         orm_mode = True
@@ -31,13 +30,11 @@ class UserUpdate(UserBase):
     is_active: Optional[bool]
     full_name: Optional[str]
     phone_number: Optional[str]
-    account_id: Optional[str]
     password: Optional[str]
 
 
 class UserInDBBase(UserBase):
-    id: ObjectId
-    user_role: Optional[UserRole]
+    id: Optional[ObjectId]
     created_at: datetime
     updated_at: datetime
 
@@ -47,10 +44,32 @@ class UserInDBBase(UserBase):
 
 
 # Additional properties to return via API
+class UserRole(BaseModel):
+    id: ObjectId = Field(alias="_id")
+    name: str
+
+    class Config:
+        orm_mode = True
+        json_encoders = {ObjectId: str}
+
+
+class UserAccount(BaseModel):
+    id: ObjectId = Field(alias="_id")
+    name: str
+
+    class Config:
+        orm_mode = True
+        json_encoders = {ObjectId: str}
+
+
 class User(UserInDBBase):
-    pass
+    role: Optional[UserRole]
+    account: Optional[UserAccount]
 
 
 # Additional properties stored in DB
 class UserInDB(UserInDBBase):
+    id: ObjectId = Field(alias="_id")
     hashed_password: str
+    account: Optional[Dict]
+    role: Optional[Dict]

@@ -1,13 +1,14 @@
+from typing import Optional, Union
+
 from pydantic import BaseModel
 
-from app.schemas.role import Role
 from app.schemas.validators import ObjectId
 
 
 # Shared properties
 class UserRoleBase(BaseModel):
-    user_id: str
-    role_id: str
+    user_id: Optional[Union[str, ObjectId]]
+    role_id: Optional[Union[str, ObjectId]]
 
 
 # Properties to receive via API on creation
@@ -21,7 +22,7 @@ class UserRoleUpdate(BaseModel):
 
 
 class UserRoleInDBBase(UserRoleBase):
-    role: Role
+    id: Optional[ObjectId]
 
     class Config:
         orm_mode = True
