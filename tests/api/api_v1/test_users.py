@@ -130,6 +130,41 @@ async def test_create_user(
 
 
 @pytest.mark.asyncio
+async def test_create_user_with_exists_email(
+    client: AsyncClient, auto_init_db: Any, superadmin_token_headers: Dict
+) -> None:
+    email = faker_data.email()
+    password = faker_data.password(length=12)
+    full_name = faker_data.name()
+    phone_number = faker_data.random_number(digits=10)
+    account_id = ObjectId()
+    user_in = schemas.UserCreate(
+        email=email,
+        password=password,
+        full_name=full_name,
+        phone_number=phone_number,
+        account_id=str(account_id),
+    )
+    await crud.user.create(obj_in=user_in)
+
+    data = {
+        "email": email,
+        "password": faker_data.password(length=12),
+        "full_name": faker_data.name(),
+        "phone_number": faker_data.random_number(digits=10),
+        "account_id": str(ObjectId()),
+    }
+    r = await client.post(
+        f"{settings_test.API_V1_PREFIX}/users",
+        headers=superadmin_token_headers,
+        json=data,
+    )
+    user_created = r.json()
+    expected_error_message = f"User with email <<{email}>> already exists"
+    assert user_created["detail"] == expected_error_message
+
+
+@pytest.mark.asyncio
 async def test_partial_remove_user(
     client: AsyncClient, auto_init_db: Any, superadmin_token_headers: Dict
 ) -> None:
@@ -202,6 +237,20 @@ async def test_remove_user(
 
 
 @pytest.mark.asyncio
+async def test_remove_user_without_exists_user(
+    client: AsyncClient, auto_init_db: Any, superadmin_token_headers: Dict
+) -> None:
+    random_user_id = str(ObjectId())
+    r = await client.delete(
+        f"{settings_test.API_V1_PREFIX}/users/{random_user_id}",
+        headers=superadmin_token_headers,
+    )
+    result = r.json()
+    expected_error_message = f"User with id <<{random_user_id}>> not exists"
+    assert result["detail"] == expected_error_message
+
+
+@pytest.mark.asyncio
 async def test_update_user(
     client: AsyncClient, auto_init_db: Any, superadmin_token_headers: Dict
 ) -> None:
@@ -250,6 +299,27 @@ async def test_update_user(
 
 
 @pytest.mark.asyncio
+async def test_update_user_without_exists_user(
+    client: AsyncClient, auto_init_db: Any, superadmin_token_headers: Dict
+) -> None:
+    random_user_id = str(ObjectId())
+    data = dict(
+        email=faker_data.email(),
+        password=faker_data.password(length=12),
+        full_name=faker_data.name(),
+        phone_number=faker_data.random_number(digits=10),
+    )
+    r = await client.post(
+        f"{settings_test.API_V1_PREFIX}/users/{random_user_id}",
+        headers=superadmin_token_headers,
+        json=data,
+    )
+    updated_user = r.json()
+    expected_error_message = f"User with id <<{random_user_id}>> not exists"
+    assert updated_user["detail"] == expected_error_message
+
+
+@pytest.mark.asyncio
 async def test_create_user_open(
     client: AsyncClient, auto_init_db: Any, normal_user_token_headers: Dict
 ) -> None:
@@ -282,6 +352,41 @@ async def test_create_user_open(
         plain_password=password,
         hashed_password=user_found.hashed_password,
     )
+
+
+@pytest.mark.asyncio
+async def test_create_user_open_with_exists_email(
+    client: AsyncClient, auto_init_db: Any, normal_user_token_headers: Dict
+) -> None:
+    email = faker_data.email()
+    password = faker_data.password(length=12)
+    full_name = faker_data.name()
+    phone_number = faker_data.random_number(digits=10)
+    account_id = ObjectId()
+    user_in = schemas.UserCreate(
+        email=email,
+        password=password,
+        full_name=full_name,
+        phone_number=phone_number,
+        account_id=str(account_id),
+    )
+    await crud.user.create(obj_in=user_in)
+
+    data = {
+        "email": email,
+        "password": faker_data.password(length=12),
+        "full_name": faker_data.name(),
+        "phone_number": faker_data.random_number(digits=10),
+        "account_id": str(ObjectId()),
+    }
+    r = await client.post(
+        f"{settings_test.API_V1_PREFIX}/users/open",
+        headers=normal_user_token_headers,
+        json=data,
+    )
+    user_open_created = r.json()
+    expected_error_message = f"User with email <<{email}>> already exists"
+    assert user_open_created["detail"] == expected_error_message
 
 
 @pytest.mark.asyncio
