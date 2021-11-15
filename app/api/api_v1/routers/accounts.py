@@ -5,6 +5,10 @@ from starlette import status
 
 from app import crud, models, schemas
 from app.api import deps
+from app.api.api_v1.error_messages import (
+    account_error_messages,
+    users_error_messages,
+)
 from app.api.utils import is_valid_object_id
 from app.constants.role import Role
 from app.schemas.validators import ObjectId
@@ -57,7 +61,9 @@ async def create_account(
     if account:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="An account with this name already exists",
+            detail=account_error_messages[
+                "account_with_name_already_exists"
+            ].format(name=account_in.name),
         )
     account = await crud.account.create(obj_in=account_in)
     return account
@@ -77,20 +83,26 @@ async def add_user_to_account(
     if not account:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Account does not exist",
+            detail=account_error_messages["account_not_exists"].format(
+                account_id=account_id
+            ),
         )
 
     if not is_valid_object_id(user_id):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid user_id",
+            detail=users_error_messages["invalid_format_user_id"].format(
+                user_id=user_id
+            ),
         )
 
     user = await crud.user.get(_id=user_id)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User does not exist",
+            detail=users_error_messages["user_not_exists"].format(
+                user_id=user_id
+            ),
         )
     user_in = schemas.UserUpdate(account_id=account_id)
     updated_user = await crud.user._update(_id=user_id, obj_in=user_in)
@@ -131,7 +143,9 @@ async def update_account(
     if not account:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Account does not exist",
+            detail=account_error_messages["account_not_exists"].format(
+                account_id=account_id
+            ),
         )
     account = await crud.account._update(_id=account_id, obj_in=account_in)
     return account
@@ -155,7 +169,9 @@ async def remove_account(
     if not account:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Account does not exist",
+            detail=account_error_messages["account_not_exists"].format(
+                account_id=account_id
+            ),
         )
     account_deleted = await crud.account._remove(_id=account_id)
     if account_deleted != 1:
@@ -187,7 +203,9 @@ async def remove_partial_account(
     if not account:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Account does not exist",
+            detail=account_error_messages["account_not_exists"].format(
+                account_id=account_id
+            ),
         )
     account_deleted = await crud.account.partial_remove(_id=account_id)
     return account_deleted
@@ -211,7 +229,9 @@ async def retrieve_users_for_account(
     if not account:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Account does not exist",
+            detail=account_error_messages["account_not_exists"].format(
+                account_id=account_id
+            ),
         )
     account_users = await crud.user.get_by_account_id(
         account_id=account_id, skip=skip, limit=limit
@@ -240,7 +260,9 @@ async def retrieve_users_for_own_account(
     if not account:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Account does not exist",
+            detail=account_error_messages["account_not_exists"].format(
+                account_id=current_user.account_id
+            ),
         )
     account_users = await crud.user.get_by_account_id(
         account_id=account.id, skip=skip, limit=limit

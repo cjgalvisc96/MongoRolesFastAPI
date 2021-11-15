@@ -7,6 +7,7 @@ from starlette import status
 
 from app import crud, models, schemas
 from app.api import deps
+from app.api.api_v1.error_messages import authentication_error_messages
 from app.core import security
 from app.core.config import settings
 
@@ -26,7 +27,7 @@ async def login_access_token(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Incorrect email or password",
+            detail=authentication_error_messages["incorrect_credentials"],
         )
 
     access_token_expires = timedelta(

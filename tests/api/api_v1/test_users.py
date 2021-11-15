@@ -169,7 +169,7 @@ async def test_partial_remove_user_not_user_exists(
     result = r.json()
     assert r.status_code == status.HTTP_404_NOT_FOUND
     assert (
-        result["detail"] == f"User wit id <<{user_id_not_exists}>> not exists"
+        result["detail"] == f"User with id <<{user_id_not_exists}>> not exists"
     )
 
 

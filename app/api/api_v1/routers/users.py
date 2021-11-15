@@ -162,7 +162,9 @@ async def remove_user(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="user does not exist",
+            detail=users_error_messages["user_not_exists"].format(
+                user_id=user_id
+            ),
         )
     user_deleted = await crud.user._remove(_id=user_id)
     if user_deleted != 1:

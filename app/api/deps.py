@@ -7,6 +7,10 @@ from jose import jwt
 from pydantic import ValidationError
 
 from app import crud, models, schemas
+from app.api.api_v1.error_messages import (
+    authentication_error_messages,
+    users_error_messages,
+)
 from app.constants.role import Role
 from app.core import security
 from app.core.config import settings
@@ -38,7 +42,7 @@ async def get_current_user(
     )
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
+        detail=authentication_error_messages["error_to_validate_credentials"],
         headers={"WWW-Authenticate": authenticate_value},
     )
     try:
@@ -52,7 +56,9 @@ async def get_current_user(
         logger.error("Error Decoding Token", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
+            detail=authentication_error_messages[
+                "error_to_validate_credentials"
+            ],
         )
 
     user = await get_host_or_guest_user(user_id=token_data.id)
@@ -61,7 +67,7 @@ async def get_current_user(
     if security_scopes.scopes and not token_data.role:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not enough permissions",
+            detail=authentication_error_messages["not_enough_permissions"],
             headers={"WWW-Authenticate": authenticate_value},
         )
 
@@ -71,7 +77,7 @@ async def get_current_user(
     ):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not enough permissions",
+            detail=authentication_error_messages["not_enough_permissions"],
             headers={"WWW-Authenticate": authenticate_value},
         )
     return user
@@ -85,7 +91,8 @@ async def get_current_active_user(
 ) -> models.User:
     if not (hasattr(current_user, "is_active") or current_user.is_active):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=users_error_messages["inactive_user"],
         )
     return current_user
 
