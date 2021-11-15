@@ -39,6 +39,30 @@ async def test_assign_user_role(
 
 
 @pytest.mark.asyncio
+async def test_assign_user_role_with_exists_user_role(
+    client: AsyncClient, auto_init_db: Any, superadmin_token_headers: Dict
+) -> None:
+    superadmin = await crud.user.get_by_email(
+        email=settings_test.FIRST_SUPER_ADMIN_EMAIL
+    )
+    data = {
+        "user_id": str(superadmin.id),
+        "role_id": str(ObjectId()),
+    }
+    r = await client.post(
+        f"{settings_test.API_V1_PREFIX}/user-roles",
+        headers=superadmin_token_headers,
+        json=data,
+    )
+    assert status.HTTP_409_CONFLICT
+    updated_user_role = r.json()
+    expected_error_message = (
+        f"User with id <<{superadmin.id}>> already has been assigned a role"
+    )
+    assert updated_user_role["detail"] == expected_error_message
+
+
+@pytest.mark.asyncio
 async def test_update_user_role(
     client: AsyncClient, auto_init_db: Any, superadmin_token_headers: Dict
 ) -> None:
@@ -71,3 +95,22 @@ async def test_update_user_role(
     updated_user_role = r.json()
     assert 200 <= r.status_code < 300
     assert updated_user_role["role_id"] == str(new_role.id)
+
+
+@pytest.mark.asyncio
+async def test_update_user_role_without_exists_user(
+    client: AsyncClient, auto_init_db: Any, superadmin_token_headers: Dict
+) -> None:
+    random_user_id = str(ObjectId())
+    data = {"role_id": str(ObjectId())}
+    r = await client.post(
+        f"{settings_test.API_V1_PREFIX}/user-roles/{random_user_id}",
+        headers=superadmin_token_headers,
+        json=data,
+    )
+    assert status.HTTP_409_CONFLICT
+    updated_user_role = r.json()
+    expected_error_message = (
+        f"There is no role assigned to this user with id <<{random_user_id}>>"
+    )
+    assert updated_user_role["detail"] == expected_error_message
