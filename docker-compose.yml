@@ -1,0 +1,25 @@
+version: '3.7'
+
+services:
+  web:
+    container_name: fastapi-role-based-access-control-auth-service
+    build: .
+    environment:
+      - PYTHONPATH=${PYTHONPATH}
+    volumes:
+      - .:/app
+    command: /app/bash_commands/startup.sh
+    ports:
+      - "${PORT}:${PORT}"
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:4.2.7
+    environment:
+      - MONGO_INITDB_DATABASE=${DB_NAME}
+    restart: always
+    volumes:
+      - ./db:/data/db
+    ports:
+      - ${DB_PORT}:${DB_PORT}

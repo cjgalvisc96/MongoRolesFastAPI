@@ -28,7 +28,7 @@
 
 
 ## Unit Tests
-
+0. Create ".env.test" file in [DirProject] using ".env.test.example" file
 1. For run the test & coverage (see all test in folder tests/*):
 
     ```sh
