@@ -134,10 +134,9 @@ async def update_account(
     ):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=(
-                "This user does not have the permissions to "
-                "update this account"
-            ),
+            detail=account_error_messages[
+                "user_without_permissions_to_update_account"
+            ].format(user_id=current_user.id),
         )
     account = await crud.account.get(_id=account_id)
     if not account:

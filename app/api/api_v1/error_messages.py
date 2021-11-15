@@ -25,6 +25,10 @@ account_error_messages = dict(
         "An account with name <<{name}>> already exists"
     ),
     account_not_exists="Account with id <<{account_id}>> not exists",
+    user_without_permissions_to_update_account=(
+        "User with id <<{user_id}>> not have the permissions to "
+        "update this account"
+    ),
 )
 
 authentication_error_messages = dict(
