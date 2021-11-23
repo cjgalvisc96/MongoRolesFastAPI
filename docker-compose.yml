@@ -10,16 +10,16 @@ services:
       - .:/app
     command: /app/bash_commands/startup.sh
     ports:
-      - "${PORT}:${PORT}"
+      - "${APP_PORT}:${APP_PORT}"
     depends_on:
       - mongodb
 
   mongodb:
-    image: mongo:4.2.7
+    image: mongo:5.0.4
     environment:
       - MONGO_INITDB_DATABASE=${DB_NAME}
     restart: always
     volumes:
       - ./db:/data/db
     ports:
-      - ${DB_PORT}:${DB_PORT}
+      - "${DB_PORT}:${DB_PORT}"
